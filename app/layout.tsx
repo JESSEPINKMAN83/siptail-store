@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "Walk Essentials — Gear for Dogs on the Go",
-  description: "Portable pet water bottles and gear for active dogs. Stay hydrated on every adventure.",
+  description: "Portable pet water bottles and walk gear for active dogs.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -13,8 +13,46 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-white">
         <Navbar />
         <main>{children}</main>
-        <footer className="border-t border-gray-100 mt-20 py-10 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} Walk Essentials. All rights reserved.</p>
+        <footer className="bg-[#2d5016] text-white mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+              <div>
+                <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-green-300">About Us</h3>
+                <ul className="space-y-2 text-sm text-green-100">
+                  <li><a href="/about" className="hover:text-white transition-colors">Our Story</a></li>
+                  <li><a href="/sustainability" className="hover:text-white transition-colors">Sustainability</a></li>
+                  <li><a href="/press" className="hover:text-white transition-colors">Press</a></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-green-300">Shop</h3>
+                <ul className="space-y-2 text-sm text-green-100">
+                  <li><a href="/products" className="hover:text-white transition-colors">All Products</a></li>
+                  <li><a href="/products?cat=new" className="hover:text-white transition-colors">New Arrivals</a></li>
+                  <li><a href="/products?cat=sale" className="hover:text-white transition-colors">Sale</a></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-green-300">Support</h3>
+                <ul className="space-y-2 text-sm text-green-100">
+                  <li><a href="/help" className="hover:text-white transition-colors">Help Center</a></li>
+                  <li><a href="/shipping" className="hover:text-white transition-colors">Shipping & Returns</a></li>
+                  <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-green-300">Follow Us</h3>
+                <ul className="space-y-2 text-sm text-green-100">
+                  <li><a href="https://instagram.com" className="hover:text-white transition-colors">Instagram</a></li>
+                  <li><a href="https://tiktok.com" className="hover:text-white transition-colors">TikTok</a></li>
+                  <li><a href="https://facebook.com" className="hover:text-white transition-colors">Facebook</a></li>
+                </ul>
+              </div>
+            </div>
+            <div className="border-t border-green-800 pt-6 text-center text-sm text-green-300">
+              <p>&copy; {new Date().getFullYear()} Walk Essentials. All rights reserved.</p>
+            </div>
+          </div>
         </footer>
       </body>
     </html>
