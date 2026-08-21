@@ -3,8 +3,28 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Walk Essentials — Gear for Dogs on the Go",
-  description: "Portable pet water bottles and walk gear for active dogs.",
+  title: {
+    default: "Walk Essentials — Premium Dog Walk & Hike Gear",
+    template: "%s | Walk Essentials",
+  },
+  description:
+    "Everything your dog needs for the perfect walk or hike. BPA-free water bottles, trail-ready gear, and more. Fast shipping to the US and Europe.",
+  openGraph: {
+    title: "Walk Essentials — Premium Dog Walk & Hike Gear",
+    description:
+      "Everything your dog needs for the perfect walk or hike. BPA-free water bottles, trail-ready gear, and more. Fast shipping to the US and Europe.",
+    url: "https://siptail-store.vercel.app",
+    siteName: "Walk Essentials",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Walk Essentials — Premium Dog Walk & Hike Gear",
+    description: "Everything your dog needs for the perfect walk or hike.",
+  },
+  alternates: {
+    canonical: "https://siptail-store.vercel.app",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -36,7 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-green-300">Support</h3>
                 <ul className="space-y-2 text-sm text-green-100">
                   <li><a href="/help" className="hover:text-white transition-colors">Help Center</a></li>
-                  <li><a href="/shipping" className="hover:text-white transition-colors">Shipping & Returns</a></li>
+                  <li><a href="/shipping" className="hover:text-white transition-colors">Shipping &amp; Returns</a></li>
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
                 </ul>
               </div>
