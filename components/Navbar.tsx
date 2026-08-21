@@ -7,7 +7,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
-            SipTail 🐾
+            Walk Essentials 🐾
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/products" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">

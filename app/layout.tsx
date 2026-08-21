@@ -3,8 +3,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "SipTail — Hydrate Your Dog on Every Walk",
-  description: "Portable pet water bottles for active dogs.",
+  title: "Walk Essentials — Gear for Dogs on the Go",
+  description: "Portable pet water bottles and gear for active dogs. Stay hydrated on every adventure.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
         <main>{children}</main>
         <footer className="border-t border-gray-100 mt-20 py-10 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} SipTail. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Walk Essentials. All rights reserved.</p>
         </footer>
       </body>
     </html>
