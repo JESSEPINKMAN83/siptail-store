@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
+import WishlistButton from "@/components/WishlistButton";
 import { getWixServerClient } from "@/lib/wix-client";
 
 type AnyProduct = {
@@ -136,14 +137,7 @@ export default async function HomePage() {
                         </svg>}
                     <div className="absolute top-0 left-0 px-2 py-1 text-xs font-bold uppercase tracking-wide text-white"
                       style={{ background: "#1B4332" }}>{badge}</div>
-                    <button onClick={(e) => e.preventDefault()}
-                      className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center border transition-colors"
-                      style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
-                      <svg className="w-4 h-4" fill="none" stroke="#1A1A1A" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
-                    </button>
+                    <WishlistButton />
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold text-sm mb-1 leading-snug line-clamp-2"
