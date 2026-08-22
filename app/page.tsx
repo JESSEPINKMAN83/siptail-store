@@ -10,7 +10,8 @@ type AnyProduct = {
 
 const FALLBACK: AnyProduct[] = [{
   _id: "fallback-1", name: "SipTail Trail Bottle", slug: "siptail-trail-bottle",
-  description: "One-handed, no-spill, BPA-free. Built for every trail.", priceData: { formatted: { price: "$24.99" } }, media: null,
+  description: "One-handed, no-spill, BPA-free. Built for every trail.",
+  priceData: { formatted: { price: "$24.99" } }, media: null,
 }];
 
 const BADGES = ["Best Seller", "New In", "Staff Pick", "Top Rated"];
@@ -40,48 +41,48 @@ export default async function HomePage() {
     <div style={{ background: "#F5F4F0" }}>
 
       {/* Hero */}
-      <section className="px-4 py-20 md:py-32" style={{ background: "#F5F4F0" }}>
+      <section className="px-4 py-20 md:py-32">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
-              <p className="text-xs uppercase tracking-widest mb-4 font-medium" style={{ color: "#1B4332" }}>New season collection</p>
+              <p className="text-xs uppercase tracking-widest mb-4 font-medium" style={{ color: "#1B4332" }}>
+                New season collection
+              </p>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6"
                 style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: "#1B4332" }}>
                 Every walk,<br />better.
               </h1>
-              <p className="text-lg mb-8 max-w-md leading-relaxed" style={{ color: "#1A1A1A", fontFamily: "Inter, system-ui, sans-serif" }}>
+              <p className="text-lg mb-8 max-w-md leading-relaxed" style={{ color: "#1A1A1A" }}>
                 Premium gear for every trail, path and adventure. Built for dogs who keep up.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link href="/products"
-                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide transition-colors text-center"
-                  style={{ background: "#1B4332", color: "#FFFFFF" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#4A7C59")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "#1B4332")}>
+                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center text-white hover:opacity-90 active:opacity-80 transition-opacity touch-manipulation"
+                  style={{ background: "#1B4332" }}>
                   Shop Now
                 </Link>
                 <Link href="/products/siptail-trail-bottle"
-                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide transition-colors text-center border"
-                  style={{ background: "transparent", color: "#1B4332", borderColor: "#1B4332" }}>
+                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center border hover:opacity-80 active:opacity-70 transition-opacity touch-manipulation"
+                  style={{ color: "#1B4332", borderColor: "#1B4332" }}>
                   See the Trail Bottle
                 </Link>
               </div>
             </div>
             {/* Hero image block */}
             <div className="relative">
-              <div className="aspect-square rounded-sm overflow-hidden flex items-center justify-center" style={{ background: "#D4E6D4" }}>
+              <div className="aspect-square flex items-center justify-center" style={{ background: "#D4E6D4" }}>
                 <div className="text-center p-10">
                   <svg viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-20 mx-auto mb-4">
                     <path d="M10 70 L38 18 L66 70" stroke="#1B4332" strokeWidth="3" strokeLinejoin="round" fill="none"/>
                     <path d="M52 70 L82 8 L112 70" stroke="#1B4332" strokeWidth="3" strokeLinejoin="round" fill="none"/>
                     <path d="M6 75 Q26 69 46 73 Q66 77 86 71 Q106 65 116 70" stroke="#4A7C59" strokeWidth="2" strokeLinecap="round" fill="none"/>
                   </svg>
-                  <p className="text-sm font-medium" style={{ color: "#1B4332", fontFamily: "Georgia, serif" }}>SipTail Trail Bottle</p>
+                  <p className="text-sm font-medium" style={{ fontFamily: "Georgia, serif", color: "#1B4332" }}>SipTail Trail Bottle</p>
                   <p className="text-xs mt-1" style={{ color: "#4A7C59" }}>Product photography coming soon</p>
                 </div>
               </div>
-              {/* Badge */}
-              <div className="absolute top-4 left-4 px-3 py-1.5 text-xs font-bold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>
+              <div className="absolute top-4 left-4 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white"
+                style={{ background: "#1B4332" }}>
                 New Arrival
               </div>
             </div>
@@ -92,11 +93,13 @@ export default async function HomePage() {
       {/* Category grid */}
       <section className="py-16 px-4" style={{ background: "#FFFFFF" }}>
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold mb-10" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>Shop by Category</h2>
-          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <h2 className="text-2xl font-bold mb-10" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>
+            Shop by Category
+          </h2>
+          <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
             {CATEGORIES.map((cat) => (
               <Link key={cat.label} href={cat.href}
-                className="group flex flex-col items-center gap-3 p-4 border transition-all text-center hover:shadow-sm active:scale-[0.98] touch-manipulation"
+                className="group flex flex-col items-center gap-3 p-4 border text-center hover:opacity-80 active:scale-[0.98] transition-all touch-manipulation"
                 style={{ background: "#F5F4F0", borderColor: "#D4E6D4" }}>
                 <span className="text-2xl" style={{ color: "#1B4332" }}>{cat.icon}</span>
                 <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "#1A1A1A" }}>{cat.label}</span>
@@ -111,7 +114,8 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-2xl font-bold" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>Best Sellers</h2>
-            <Link href="/products" className="text-xs font-semibold uppercase tracking-wide hover:opacity-70 transition-opacity" style={{ color: "#1B4332" }}>View All →</Link>
+            <Link href="/products" className="text-xs font-semibold uppercase tracking-wide hover:opacity-70 transition-opacity"
+              style={{ color: "#1B4332" }}>View All →</Link>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {bestSellers.map((p, i) => {
@@ -120,24 +124,40 @@ export default async function HomePage() {
               const price = p.priceData?.formatted?.price ?? "$24.99";
               return (
                 <Link key={`${p._id}-${i}`} href={`/products/${p.slug ?? "siptail-trail-bottle"}`}
-                  className="group border transition-all hover:shadow-md active:scale-[0.98] touch-manipulation"
+                  className="group border hover:shadow-md active:scale-[0.98] transition-all touch-manipulation"
                   style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
-                  <div className="relative aspect-square flex items-center justify-center" style={{ background: "#F5F4F0" }}>
+                  <div className="relative aspect-square flex items-center justify-center overflow-hidden"
+                    style={{ background: "#F5F4F0" }}>
                     {img
                       ? <img src={img} alt={p.name ?? ""} className="w-full h-full object-cover" />
-                      : <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16 opacity-30"><path d="M8 56 L28 16 L48 56" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" fill="none"/><path d="M30 56 L50 8 L70 56" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" fill="none"/></svg>}
-                    <div className="absolute top-0 left-0 px-2 py-1 text-xs font-bold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>{badge}</div>
-                    <button onClick={(e) => e.preventDefault()} className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center border transition-colors" style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
-                      <svg className="w-4 h-4" fill="none" stroke="#1A1A1A" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                      : <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16 opacity-20">
+                          <path d="M8 56 L28 16 L48 56" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" fill="none"/>
+                          <path d="M30 56 L50 8 L70 56" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" fill="none"/>
+                        </svg>}
+                    <div className="absolute top-0 left-0 px-2 py-1 text-xs font-bold uppercase tracking-wide text-white"
+                      style={{ background: "#1B4332" }}>{badge}</div>
+                    <button onClick={(e) => e.preventDefault()}
+                      className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center border transition-colors"
+                      style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
+                      <svg className="w-4 h-4" fill="none" stroke="#1A1A1A" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
                     </button>
                   </div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-sm mb-1 leading-snug line-clamp-2" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>{p.name}</h3>
-                    <div className="flex items-center gap-1 mb-2 text-xs" style={{ color: "#4A7C59" }}>★★★★★ <span style={{ color: "#6B7280" }}>4.8 (124)</span></div>
+                    <h3 className="font-semibold text-sm mb-1 leading-snug line-clamp-2"
+                      style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>{p.name}</h3>
+                    <div className="flex items-center gap-1 mb-2 text-xs" style={{ color: "#4A7C59" }}>
+                      ★★★★★ <span style={{ color: "#6B7280" }}>4.8 (124)</span>
+                    </div>
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-sm" style={{ color: "#1B4332" }}>{price}</span>
-                      <div className="w-8 h-8 flex items-center justify-center transition-colors" style={{ background: "#1B4332" }}>
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                      <div className="w-8 h-8 flex items-center justify-center text-white"
+                        style={{ background: "#1B4332" }}>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
                       </div>
                     </div>
                   </div>
