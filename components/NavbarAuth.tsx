@@ -4,11 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface Member {
-  profile?: { firstName?: string | null; nickname?: string | null } | null;
+  profile?: { firstName?: string | null } | null;
   loginEmail?: string | null;
 }
 
-export default function NavbarAuth() {
+interface Props {
+  signInLabel?: string;
+  accountLabel?: string;
+}
+
+export default function NavbarAuth({ signInLabel = "Sign In", accountLabel = "My account" }: Props) {
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -43,24 +48,24 @@ export default function NavbarAuth() {
   if (!member) {
     return (
       <Link href="/login"
-        className="hidden sm:flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-[#1B4332] transition-colors touch-manipulation min-h-[44px]">
+        className="hidden sm:flex items-center gap-1 px-3 py-2 text-sm font-medium text-[#1A1A1A] hover:text-[#1B4332] transition-colors touch-manipulation min-h-[44px]">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
-        <span className="hidden md:inline">Sign In</span>
+        <span className="hidden md:inline">{signInLabel}</span>
       </Link>
     );
   }
 
-  const displayName = member.profile?.firstName || member.profile?.nickname || member.loginEmail?.split("@")[0] || "Account";
+  const displayName = (member.profile as { firstName?: string | null } | null)?.firstName || member.loginEmail?.split("@")[0] || accountLabel;
 
   return (
     <div ref={ref} className="relative hidden sm:block">
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#1B4332] hover:bg-green-50 rounded-xl transition-colors touch-manipulation min-h-[44px]"
+        className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[#1B4332] hover:bg-green-50 rounded transition-colors touch-manipulation min-h-[44px]"
       >
-        <div className="w-7 h-7 rounded-full bg-[#1B4332] text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: "#1B4332" }}>
           {displayName[0].toUpperCase()}
         </div>
         <span className="hidden md:inline max-w-[80px] truncate">{displayName}</span>
@@ -68,19 +73,15 @@ export default function NavbarAuth() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-
       {open && (
-        <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-100 rounded-2xl shadow-lg py-2 z-50">
+        <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-2 z-50">
           <Link href="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#1B4332] transition-colors">
-            <span>👤</span> My Account
-          </Link>
-          <Link href="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#1B4332] transition-colors">
-            <span>📦</span> Orders
+            <span>👤</span> {accountLabel}
           </Link>
           <div className="border-t border-gray-100 my-1" />
           <button onClick={() => { setOpen(false); handleLogout(); }}
             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-            <span>🚪</span> Log Out
+            <span>🚪</span> {document.documentElement.lang === "he" ? "התנתקות" : "Log Out"}
           </button>
         </div>
       )}

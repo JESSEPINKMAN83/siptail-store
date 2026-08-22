@@ -2,8 +2,9 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import WishlistButton from "@/components/WishlistButton";
 import { getWixServerClient } from "@/lib/wix-client";
-import { getLocale, formatPrice } from "@/lib/locale";
+import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/translations";
+import { WE_CONFIG, ilsFromUsd } from "@/lib/config";
 
 type AnyProduct = {
   _id?: string | null; name?: string | null; slug?: string | null;
@@ -11,20 +12,40 @@ type AnyProduct = {
   media?: { mainMedia?: { image?: { url?: string | null } | null } | null } | null;
 };
 
-const FALLBACK_EN: AnyProduct = {
-  _id: "fallback-1", name: "SipTail Trail Bottle", slug: "siptail-trail-bottle",
-  description: "One-handed, no-spill, BPA-free. Built for every trail.",
-  priceData: { formatted: { price: "$24.99" } }, media: null,
+// WE-01: Real product photos (CJ CJJJCWGY00675 — portable dog water bottle)
+// TODO: Replace with official CJ CDN URLs once direct access is available
+const PRODUCT_PHOTOS = WE_CONFIG.PRODUCT_IMAGES;
+
+const PRODUCT_EN: AnyProduct = {
+  _id: "siptail-1", name: "SipTail Trail Bottle", slug: "siptail-trail-bottle",
+  description: "520ml squeeze-to-fill bottle with a silicone leaf-bowl. BPA-free, leak-proof, 180g.",
+  priceData: { formatted: { price: "$24.99" } },
+  media: { mainMedia: { image: { url: PRODUCT_PHOTOS[0] } } },
+};
+const PRODUCT_HE: AnyProduct = {
+  _id: "siptail-1", name: "בקבוק מים SipTail לכלבים", slug: "siptail-trail-bottle",
+  description: "בקבוק המים הנייד המושלם לטיולים. 520 מ״ל, קערת סיליקון מתקפלת, חסין דליפות, 180 גרם.",
+  priceData: { formatted: { price: "$24.99" } },
+  media: { mainMedia: { image: { url: PRODUCT_PHOTOS[0] } } },
 };
 
-const FALLBACK_HE: AnyProduct = {
-  _id: "fallback-1", name: "בקבוק מים SipTail לכלבים", slug: "siptail-trail-bottle",
-  description: "בקבוק המים הנייד המושלם לטיולים עם הכלב שלך. קל, חסין דליפות, ומחזיק 350 מ״ל.",
-  priceData: { formatted: { price: "$24.99" } }, media: null,
+// WE-03: Inline SVG category icons — no font dependency
+const CATEGORY_ICONS = {
+  hydration: (<svg viewBox="0 0 24 24" fill="none" stroke="#1B4332" strokeWidth={1.8} className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h8M12 8v8"/></svg>),
+  trail: (<svg viewBox="0 0 24 24" fill="none" stroke="#1B4332" strokeWidth={1.8} className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M3 20l4-8 4 4 4-8 4 8"/></svg>),
+  safety: (<svg viewBox="0 0 24 24" fill="none" stroke="#1B4332" strokeWidth={1.8} className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>),
+  walk: (<svg viewBox="0 0 24 24" fill="none" stroke="#1B4332" strokeWidth={1.8} className="w-6 h-6"><circle cx="12" cy="5" r="2"/><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l-2 6m5-6l2 6m-5-6l1-4 3 2 2-4"/></svg>),
+  sport: (<svg viewBox="0 0 24 24" fill="none" stroke="#1B4332" strokeWidth={1.8} className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>),
+  gift: (<svg viewBox="0 0 24 24" fill="none" stroke="#1B4332" strokeWidth={1.8} className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M20 12v10H4V12M22 7H2v5h20V7zM12 22V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>),
 };
 
-const BADGES_EN = ["Best Seller", "New In", "Staff Pick", "Top Rated"];
-const BADGES_HE = ["הנמכר ביותר", "חדש", "המלצת הצוות", "מדורג גבוה"];
+// WE-03: Inline SVG trust icons
+const TRUST_ICONS = {
+  secure: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4"/></svg>),
+  returns: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l4-4M3 10l4 4"/></svg>),
+  invoice: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 14h6M9 10h6M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/></svg>),
+  support: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>),
+};
 
 async function fetchProducts(): Promise<AnyProduct[]> {
   try {
@@ -38,41 +59,51 @@ export default async function HomePage() {
   const locale = await getLocale();
   const isHe = locale === "he";
   const wixProducts = await fetchProducts();
-  const fallback = isHe ? FALLBACK_HE : FALLBACK_EN;
-  const products = wixProducts.length > 0 ? wixProducts : [fallback, fallback, fallback, fallback];
-  const bestSellers = products.slice(0, 4);
-  const badges = isHe ? BADGES_HE : BADGES_EN;
+  const fallback = isHe ? PRODUCT_HE : PRODUCT_EN;
 
-  const CATEGORIES = [
-    { icon: "H", label: isHe ? "הידרציה" : "Hydration", href: `/products?cat=hydration&lang=${locale}` },
-    { icon: "T", label: isHe ? "טיול וטרקים" : "Trail & Hike", href: `/products?cat=trail-hike&lang=${locale}` },
-    { icon: "S", label: isHe ? "בטיחות" : "Dog Safety", href: `/products?cat=dog-safety&lang=${locale}` },
-    { icon: "W", label: isHe ? "ציוד הליכה" : "Walk Gear", href: `/products?cat=walk-gear&lang=${locale}` },
-    { icon: "A", label: isHe ? "ספורט" : "Active & Sport", href: `/products?cat=active&lang=${locale}` },
-    { icon: "G", label: isHe ? "מתנות" : "Gift Ideas", href: `/products?cat=gifts&lang=${locale}` },
+  // WE-02: Show 1 product when catalogue has 1 item; fill from Wix when more exist
+  const displayProducts = wixProducts.length > 0 ? wixProducts : [fallback];
+
+  const priceIls = ilsFromUsd(fallback.priceData?.formatted?.price ?? "$24.99");
+  const priceFrom = isHe ? `מחיר החל מ ${priceIls}` : `From ${priceIls}`;
+
+  const categories = [
+    { icon: CATEGORY_ICONS.hydration, label: isHe ? "הידרציה" : "Hydration", href: `/products?cat=hydration&lang=${locale}` },
+    { icon: CATEGORY_ICONS.trail, label: isHe ? "טיול וטרקים" : "Trail & Hike", href: `/products?cat=trail-hike&lang=${locale}` },
+    { icon: CATEGORY_ICONS.safety, label: isHe ? "בטיחות" : "Dog Safety", href: `/products?cat=dog-safety&lang=${locale}` },
+    { icon: CATEGORY_ICONS.walk, label: isHe ? "ציוד הליכה" : "Walk Gear", href: `/products?cat=walk-gear&lang=${locale}` },
+    { icon: CATEGORY_ICONS.sport, label: isHe ? "ספורט" : "Active & Sport", href: `/products?cat=active&lang=${locale}` },
+    { icon: CATEGORY_ICONS.gift, label: isHe ? "מתנות" : "Gift Ideas", href: `/products?cat=gifts&lang=${locale}` },
+  ];
+
+  const trustItems = [
+    { icon: TRUST_ICONS.secure, label: t(locale, "trust.securePayment") },
+    { icon: TRUST_ICONS.returns, label: t(locale, "trust.returns") },
+    { icon: TRUST_ICONS.invoice, label: t(locale, "trust.invoice") },
+    { icon: TRUST_ICONS.support, label: t(locale, "trust.hebrewSupport") },
   ];
 
   return (
     <div style={{ background: "#F5F4F0" }}>
 
-      {/* Hero */}
-      <section className="px-4 py-20 md:py-32">
+      {/* Hero — WE-20 additions below CTAs */}
+      <section className="px-4 py-20 md:py-28">
         <div className="max-w-7xl mx-auto">
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${isHe ? "md:grid-flow-col-dense" : ""}`}>
-            <div className={isHe ? "md:order-2 text-right md:text-right" : ""}>
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${isHe ? "md:direction-rtl" : ""}`}>
+            <div className={isHe ? "text-right" : ""}>
               <p className="text-xs uppercase tracking-widest mb-4 font-medium" style={{ color: "#1B4332" }}>
                 {isHe ? "קולקציית העונה החדשה" : "New season collection"}
               </p>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6"
+              <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6"
                 style={{ fontFamily: isHe ? "Noto Serif Hebrew, Georgia, serif" : "Georgia, 'Times New Roman', serif", color: "#1B4332" }}>
                 {t(locale, "hero_headline")}
               </h1>
               <p className="text-lg mb-8 max-w-md leading-relaxed" style={{ color: "#1A1A1A" }}>
                 {t(locale, "hero_sub")}
               </p>
-              <div className={`flex flex-col sm:flex-row gap-3 ${isHe ? "sm:flex-row-reverse" : ""}`}>
+              <div className={`flex flex-col sm:flex-row gap-3 mb-6 ${isHe ? "sm:flex-row-reverse" : ""}`}>
                 <Link href={`/products?lang=${locale}`}
-                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center text-white hover:opacity-90 active:opacity-80 transition-opacity touch-manipulation"
+                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center text-white hover:opacity-90 transition-opacity touch-manipulation"
                   style={{ background: "#1B4332" }}>
                   {t(locale, "hero_cta")}
                 </Link>
@@ -82,24 +113,22 @@ export default async function HomePage() {
                   {t(locale, "hero_sub_cta")}
                 </Link>
               </div>
-            </div>
-            <div className={`relative ${isHe ? "md:order-1" : ""}`}>
-              <div className="aspect-square flex items-center justify-center" style={{ background: "#D4E6D4" }}>
-                <div className="text-center p-10">
-                  <svg viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-32 h-20 mx-auto mb-4">
-                    <path d="M10 70 L38 18 L66 70" stroke="#1B4332" strokeWidth="3" strokeLinejoin="round" fill="none"/>
-                    <path d="M52 70 L82 8 L112 70" stroke="#1B4332" strokeWidth="3" strokeLinejoin="round" fill="none"/>
-                    <path d="M6 75 Q26 69 46 73 Q66 77 86 71 Q106 65 116 70" stroke="#4A7C59" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                  </svg>
-                  <p className="text-sm font-medium" style={{ fontFamily: "Georgia, serif", color: "#1B4332" }}>
-                    {isHe ? "בקבוק מים SipTail לכלבים" : "SipTail Trail Bottle"}
-                  </p>
-                  <p className="text-xs mt-1" style={{ color: "#4A7C59" }}>
-                    {isHe ? "תמונת מוצר בקרוב" : "Product photography coming soon"}
-                  </p>
-                </div>
+              {/* WE-20: trust proof points below CTAs */}
+              <div className={`flex flex-wrap gap-x-4 gap-y-1 text-xs ${isHe ? "justify-end" : ""}`} style={{ color: "#4A7C59" }}>
+                <span>✓ {t(locale, "shipping.freeThreshold")}</span>
+                <span>✓ {priceFrom}</span>
+                <span>✓ {t(locale, "shipping.leadTime")}</span>
               </div>
-              <div className="absolute top-4 left-4 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white"
+            </div>
+            <div className="relative">
+              <div className="aspect-square overflow-hidden" style={{ background: "#FFFFFF" }}>
+                <img
+                  src={PRODUCT_PHOTOS[0]}
+                  alt={isHe ? "בקבוק מים לכלבים SipTail Trail" : "SipTail Trail dog water bottle"}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className={`absolute top-4 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white ${isHe ? "right-4" : "left-4"}`}
                 style={{ background: "#1B4332" }}>
                 {t(locale, "new_arrival")}
               </div>
@@ -108,72 +137,57 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Category grid */}
-      <section className="py-16 px-4" style={{ background: "#FFFFFF" }}>
+      {/* Category grid — WE-03 real SVG icons */}
+      <section className="py-14 px-4" style={{ background: "#FFFFFF" }}>
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold mb-10" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>
+          <h2 className="text-2xl font-bold mb-8" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>
             {t(locale, "shop_by_category")}
           </h2>
           <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
-            {CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <Link key={cat.label} href={cat.href}
-                className="group flex flex-col items-center gap-3 p-4 border text-center hover:opacity-80 active:scale-[0.98] transition-all touch-manipulation"
+                className="group flex flex-col items-center gap-2.5 p-4 border text-center hover:opacity-80 active:scale-[0.98] transition-all touch-manipulation"
                 style={{ background: "#F5F4F0", borderColor: "#D4E6D4" }}>
-                <span className="text-sm font-bold w-7 h-7 flex items-center justify-center border border-current rounded-sm" style={{ color: "#1B4332" }}>{cat.icon}</span>
-                <span className="text-xs font-medium" style={{ color: "#1A1A1A" }}>{cat.label}</span>
+                <span className="flex items-center justify-center">{cat.icon}</span>
+                <span className="text-xs font-medium leading-tight" style={{ color: "#1A1A1A" }}>{cat.label}</span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Best sellers */}
-      <section className="py-16 px-4" style={{ background: "#F5F4F0" }}>
+      {/* WE-02: Best sellers — show real products, 1 if only 1 exists, NO fake ratings */}
+      <section className="py-14 px-4" style={{ background: "#F5F4F0" }}>
         <div className="max-w-7xl mx-auto">
-          <div className={`flex items-center justify-between mb-10 ${isHe ? "flex-row-reverse" : ""}`}>
+          <div className={`flex items-center justify-between mb-8 ${isHe ? "flex-row-reverse" : ""}`}>
             <h2 className="text-2xl font-bold" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>
               {t(locale, "best_sellers")}
             </h2>
-            <Link href={`/products?lang=${locale}`} className="text-xs font-semibold uppercase tracking-wide hover:opacity-70 transition-opacity" style={{ color: "#1B4332" }}>
+            <Link href={`/products?lang=${locale}`} className="text-xs font-semibold uppercase tracking-wide hover:opacity-70" style={{ color: "#1B4332" }}>
               {t(locale, "view_all")} {isHe ? "←" : "→"}
             </Link>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {bestSellers.map((p, i) => {
-              const badge = badges[i % badges.length];
-              const img = p.media?.mainMedia?.image?.url;
+          {/* WE-02: Grid is 1 col when 1 product, 2-4 when more */}
+          <div className={`grid gap-4 ${displayProducts.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-2 lg:grid-cols-4"}`}>
+            {displayProducts.slice(0, 4).map((p, i) => {
+              const img = p.media?.mainMedia?.image?.url ?? PRODUCT_PHOTOS[i % PRODUCT_PHOTOS.length];
               const rawPrice = p.priceData?.formatted?.price ?? "$24.99";
-              const price = formatPrice(rawPrice, locale);
+              const price = isHe ? ilsFromUsd(rawPrice) : rawPrice;
               return (
                 <Link key={`${p._id}-${i}`} href={`/products/${p.slug ?? "siptail-trail-bottle"}?lang=${locale}`}
                   className="group border hover:shadow-md active:scale-[0.98] transition-all touch-manipulation"
                   style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
-                  <div className="relative aspect-square flex items-center justify-center overflow-hidden" style={{ background: "#F5F4F0" }}>
-                    {img ? <img src={img} alt={p.name ?? ""} className="w-full h-full object-cover" />
-                      : <svg viewBox="0 0 64 64" fill="none" className="w-16 h-16 opacity-20">
-                          <path d="M8 56 L28 16 L48 56" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" fill="none"/>
-                          <path d="M30 56 L50 8 L70 56" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" fill="none"/>
-                        </svg>}
-                    <div className={`absolute top-0 px-2 py-1 text-xs font-bold uppercase tracking-wide text-white ${isHe ? "right-0" : "left-0"}`}
-                      style={{ background: "#1B4332" }}>{badge}</div>
+                  <div className="relative aspect-square overflow-hidden" style={{ background: "#F5F4F0" }}>
+                    <img src={img} alt={p.name ?? "Product"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <WishlistButton />
                   </div>
                   <div className={`p-4 ${isHe ? "text-right" : ""}`}>
-                    <h3 className="font-semibold text-sm mb-1 leading-snug line-clamp-2"
+                    <h3 className="font-semibold text-sm mb-2 leading-snug"
                       style={{ fontFamily: isHe ? "Noto Serif Hebrew, Georgia, serif" : "Georgia, serif", color: "#1A1A1A" }}>
-                      {isHe && p._id === "fallback-1" ? "בקבוק מים SipTail לכלבים" : p.name}
+                      {isHe && p._id === "siptail-1" ? "בקבוק מים SipTail לכלבים" : p.name}
                     </h3>
-                    <div className={`flex items-center gap-1 mb-2 text-xs ${isHe ? "flex-row-reverse" : ""}`} style={{ color: "#4A7C59" }}>
-                      ★★★★★ <span style={{ color: "#6B7280" }}>4.8 (124)</span>
-                    </div>
-                    <div className={`flex items-center justify-between ${isHe ? "flex-row-reverse" : ""}`}>
-                      <span className="font-bold text-sm" style={{ color: "#1B4332" }}>{price}</span>
-                      <div className="w-8 h-8 flex items-center justify-center text-white" style={{ background: "#1B4332" }}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                      </div>
-                    </div>
+                    {/* WE-02: NO fake star ratings — removed entirely */}
+                    <span className="font-bold text-sm" style={{ color: "#1B4332" }}>{price}</span>
                   </div>
                 </Link>
               );
@@ -182,18 +196,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Trust bar */}
+      {/* WE-03: Trust strip with real inline SVG icons */}
       <section className="py-10 px-4 border-t" style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { icon: "+", key: "trust_1" as const },
-            { icon: "<", key: "trust_2" as const },
-            { icon: "V", key: "trust_3" as const },
-            { icon: "O", key: "trust_4" as const },
-          ].map(item => (
-            <div key={item.key} className="flex flex-col items-center gap-1 p-3">
-              <span className="text-lg font-bold mb-1" style={{ color: "#1B4332" }}>{item.icon}</span>
-              <span className="font-semibold text-sm" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>{t(locale, item.key)}</span>
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          {trustItems.map(item => (
+            <div key={String(item.label)} className="flex flex-col items-center gap-2 p-3">
+              <span className="flex items-center justify-center w-10 h-10 rounded-full" style={{ background: "#D4E6D4", color: "#1B4332" }}>
+                {item.icon}
+              </span>
+              <span className="text-xs font-semibold" style={{ color: "#1A1A1A" }}>{item.label}</span>
             </div>
           ))}
         </div>
