@@ -3,15 +3,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+declare global {
+  // eslint-disable-next-line no-var
+  var fbq: ((...args: unknown[]) => void) | undefined;
+}
+
 interface LineItem {
   _id?: string | null; quantity?: number | null;
   productName?: { original?: string | null } | null;
-  price?: { formattedAmount?: string | null } | null;
+  price?: { formattedAmount?: string | null; amount?: string | null } | null;
   image?: string | null;
 }
 interface CartData {
   lineItems?: LineItem[] | null;
-  subtotal?: { formattedAmount?: string | null } | null;
+  subtotal?: { formattedAmount?: string | null; amount?: string | null } | null;
 }
 
 export default function CartContents({ initialCart, isPreview }: { initialCart: unknown; isPreview?: boolean }) {
@@ -20,7 +25,6 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
   const [checkingOut, setCheckingOut] = useState(false);
   const router = useRouter();
 
-  // All cart mutations go through server actions to keep tokens consistent
   async function removeItem(id: string) {
     setLoading(true);
     try {
@@ -29,10 +33,7 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lineItemId: id }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setCart(data.cart ?? null);
-      }
+      if (res.ok) { const d = await res.json(); setCart(d.cart ?? null); }
     } catch (e) { console.error("[cart] remove failed:", e); }
     finally { setLoading(false); }
   }
@@ -46,19 +47,23 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lineItemId: id, quantity: qty }),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setCart(data.cart ?? null);
-      }
+      if (res.ok) { const d = await res.json(); setCart(d.cart ?? null); }
     } catch (e) { console.error("[cart] update qty failed:", e); }
     finally { setLoading(false); }
   }
 
-  async function handleCheckout() {
+  function handleCheckout() {
+    // Fire Meta Pixel InitiateCheckout
+    if (typeof window !== "undefined" && window.fbq) {
+      const subtotalNum = parseFloat(cart?.subtotal?.amount ?? "0") || 0;
+      window.fbq("track", "InitiateCheckout", {
+        value: subtotalNum,
+        currency: "USD",
+        num_items: cart?.lineItems?.reduce((a, i) => a + (i.quantity ?? 0), 0) ?? 0,
+      });
+    }
     setCheckingOut(true);
-    try {
-      router.push("/checkout");
-    } catch { setCheckingOut(false); }
+    router.push("/checkout");
   }
 
   if (isPreview) return (
@@ -71,6 +76,7 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
   );
 
   const items = cart?.lineItems ?? [];
+
   if (items.length === 0) return (
     <div className="text-center py-20">
       <div className="text-5xl mb-6">🛒</div>
@@ -87,7 +93,9 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
           return (
             <div key={id} className="flex gap-4 bg-white border border-gray-100 rounded-xl p-4">
               <div className="w-20 h-20 bg-[#F4F4F4] rounded-lg flex items-center justify-center flex-shrink-0">
-                {item.image ? <img src={item.image} alt={item.productName?.original ?? ""} className="w-full h-full object-cover rounded-lg" /> : <span className="text-3xl">🐾</span>}
+                {item.image
+                  ? <img src={item.image} alt={item.productName?.original ?? ""} className="w-full h-full object-cover rounded-lg" />
+                  : <span className="text-3xl">🐾</span>}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">{item.productName?.original}</h3>
@@ -99,13 +107,14 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
                   <button onClick={() => updateQty(id, (item.quantity ?? 1) + 1)} disabled={loading}
                     className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-400 active:bg-gray-50 disabled:opacity-50 touch-manipulation">+</button>
                   <button onClick={() => removeItem(id)} disabled={loading}
-                    className="text-xs text-red-400 hover:text-red-600 transition-colors ml-1 touch-manipulation py-2">Remove</button>
+                    className="text-xs text-red-400 hover:text-red-600 transition-colors ml-1 touch-manipulation py-2 px-1">Remove</button>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+
       <div className="bg-gray-50 rounded-2xl p-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-gray-600 font-medium">Subtotal</span>

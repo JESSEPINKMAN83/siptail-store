@@ -3,10 +3,15 @@ import { useState } from "react";
 import { serverAddToCart } from "@/app/actions/cart-actions";
 import { useRouter } from "next/navigation";
 
+declare global {
+  // eslint-disable-next-line no-var
+  var fbq: ((...args: unknown[]) => void) | undefined;
+}
+
 interface Variant { id: string; label: string; price: string; }
 interface Props { productId: string; productName: string; variants: Variant[]; isLive: boolean; }
 
-export default function AddToCartButton({ productId, variants, isLive }: Props) {
+export default function AddToCartButton({ productId, productName, variants, isLive }: Props) {
   const [selected, setSelected] = useState(variants[0]?.id || "");
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
@@ -14,19 +19,43 @@ export default function AddToCartButton({ productId, variants, isLive }: Props) 
   const router = useRouter();
   const sel = variants.find(v => v.id === selected) ?? variants[0];
 
+  // Parse price as a number for pixel events
+  const priceNum = sel?.price
+    ? parseFloat(sel.price.replace(/[^0-9.]/g, "")) || 0
+    : 0;
+
   async function handleAdd() {
-    if (!isLive) { router.push("/cart?preview=1"); return; }
-    setLoading(true); setError("");
+    if (!isLive) {
+      router.push("/cart?preview=1");
+      return;
+    }
+    setLoading(true);
+    setError("");
     try {
+      console.log("[AddToCart] calling serverAddToCart", { productId, selected, qty: 1 });
       const result = await serverAddToCart(productId, selected || null, 1);
+      console.log("[AddToCart] result:", result);
+
       if (!result.ok) {
         setError("Could not add to cart. Please try again.");
         console.error("[AddToCart] server error:", result.error);
         return;
       }
+
+      // Fire Meta Pixel AddToCart event
+      if (typeof window !== "undefined" && window.fbq) {
+        window.fbq("track", "AddToCart", {
+          value: priceNum,
+          currency: "USD",
+          content_ids: [productId],
+          content_name: productName,
+          content_type: "product",
+        });
+      }
+
       setAdded(true);
       setTimeout(() => setAdded(false), 2500);
-      router.refresh(); // refreshes cart icon count
+      router.refresh();
     } catch (e) {
       console.error("[AddToCart] unexpected error:", e);
       setError("Could not add to cart. Please try again.");
@@ -37,7 +66,6 @@ export default function AddToCartButton({ productId, variants, isLive }: Props) 
 
   return (
     <div className="space-y-2">
-      {/* Variant selector */}
       {variants.length > 1 && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
@@ -57,7 +85,6 @@ export default function AddToCartButton({ productId, variants, isLive }: Props) 
         </div>
       )}
 
-      {/* Add to cart button */}
       <button onClick={handleAdd} disabled={loading}
         className={`w-full py-4 px-8 rounded-full font-bold text-lg transition-all touch-manipulation min-h-[56px] ${
           added
@@ -69,10 +96,7 @@ export default function AddToCartButton({ productId, variants, isLive }: Props) 
         {added ? "Added to cart ✓" : loading ? "Adding..." : `Add to Cart${sel?.price ? ` — ${sel.price}` : ""}`}
       </button>
 
-      {/* Error state */}
-      {error && (
-        <p className="text-red-500 text-sm text-center">{error}</p>
-      )}
+      {error && <p className="text-red-500 text-sm text-center bg-red-50 rounded-lg px-3 py-2">{error}</p>}
     </div>
   );
 }

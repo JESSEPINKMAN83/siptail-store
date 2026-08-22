@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: {
@@ -24,12 +25,35 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://siptail-store.vercel.app" },
 };
 
+const META_PIXEL_ID = "1375359411376605";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-white">
+        {/* Meta Pixel */}
+        <Script id="meta-pixel" strategy="afterInteractive">{`
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${META_PIXEL_ID}');
+          fbq('track', 'PageView');
+        `}</Script>
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img height="1" width="1" style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+            alt="" />
+        </noscript>
+
         <Navbar />
         <main>{children}</main>
+
         <footer className="bg-[#2d5016] text-white mt-16">
           {/* Newsletter strip */}
           <div className="border-b border-green-800">
@@ -68,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-green-300">Support</h3>
                 <ul className="space-y-2 text-sm text-green-100">
                   <li><a href="/contact" className="hover:text-white transition-colors">Contact Us</a></li>
-                  <li><a href="/contact" className="hover:text-white transition-colors">Shipping & Returns</a></li>
+                  <li><a href="/contact" className="hover:text-white transition-colors">Shipping &amp; Returns</a></li>
                   <li><a href="/login" className="hover:text-white transition-colors">My Account</a></li>
                 </ul>
               </div>
