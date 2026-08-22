@@ -40,3 +40,15 @@ h1, h2, h3, h4 {
 @media (prefers-reduced-motion: reduce) {
   .trail-rise { animation: none; }
 }
+
+/* Scroll cue — a thread of light travelling down */
+@keyframes trailScrollCue {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  45%  { transform: scaleY(1); transform-origin: top; }
+  55%  { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+.trail-scroll-line { animation: trailScrollCue 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .trail-scroll-line { animation: none; }
+}

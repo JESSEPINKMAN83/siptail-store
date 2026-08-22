@@ -97,6 +97,12 @@ export default async function TrailPage() {
           <TrailScene className="w-full h-full" />
         </div>
 
+        {/* Top scrim — keeps the navbar legible over the bright sky */}
+        <div
+          className="absolute inset-x-0 top-0 pointer-events-none"
+          style={{ height: "22%", background: "linear-gradient(to bottom, rgba(8,14,20,0.45), rgba(8,14,20,0))" }}
+        />
+
         {/* Scrim — keeps the copy legible without flattening the scene */}
         <div
           className="absolute inset-x-0 bottom-0 pointer-events-none"
@@ -112,7 +118,7 @@ export default async function TrailPage() {
             <div className={`max-w-2xl trail-rise ${align} ${isHe ? "ms-auto" : ""}`}>
               <p
                 className="text-[11px] md:text-xs uppercase tracking-[0.22em] mb-4"
-                style={{ color: "#D9C9A8" }}
+                style={{ color: "#EBCFA0", textShadow: "0 1px 14px rgba(10,16,24,0.5)" }}
               >
                 {t(locale, "trail_eyebrow")}
               </p>
@@ -120,15 +126,17 @@ export default async function TrailPage() {
                 className="font-bold leading-[1.02] mb-5"
                 style={{
                   fontFamily: serif,
-                  color: "#F8F5EE",
+                  color: "#FBF8F1",
                   fontSize: "clamp(2.75rem, 7vw, 5.25rem)",
+                  letterSpacing: isHe ? undefined : "-0.02em",
+                  textShadow: "0 2px 30px rgba(8,16,12,0.5), 0 1px 3px rgba(8,16,12,0.35)",
                 }}
               >
                 {t(locale, "trail_headline")}
               </h1>
               <p
                 className="text-base md:text-lg leading-relaxed mb-8 max-w-md"
-                style={{ color: "#D5DBCC", marginInlineStart: isHe ? "auto" : undefined }}
+                style={{ color: "#E4E7D9", textShadow: "0 1px 16px rgba(8,16,12,0.45)", marginInlineStart: isHe ? "auto" : undefined }}
               >
                 {t(locale, "trail_sub")}
               </p>
@@ -136,14 +144,14 @@ export default async function TrailPage() {
               <div className={`flex flex-col ${ctaRow} gap-3 mb-7`}>
                 <Link
                   href={`/products/siptail-trail-bottle?lang=${locale}`}
-                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center transition-opacity hover:opacity-90 touch-manipulation"
+                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center rounded-[3px] shadow-[0_12px_36px_rgba(8,20,12,0.4)] transition-all hover:-translate-y-0.5 hover:opacity-95 touch-manipulation"
                   style={{ background: "#F5F4F0", color: "#1B4332" }}
                 >
                   {t(locale, "trail_cta")}
                 </Link>
                 <Link
                   href={`/products?lang=${locale}`}
-                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center border transition-colors hover:bg-white/10 touch-manipulation"
+                  className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center rounded-[3px] border bg-white/10 backdrop-blur-md transition-colors hover:bg-white/20 touch-manipulation"
                   style={{ borderColor: "rgba(245,244,240,0.55)", color: "#F5F4F0" }}
                 >
                   {t(locale, "trail_cta_alt")}
@@ -152,7 +160,7 @@ export default async function TrailPage() {
 
               <div
                 className={`flex flex-wrap gap-x-5 gap-y-1.5 text-xs ${isHe ? "justify-end" : ""}`}
-                style={{ color: "#BFCBB4" }}
+                style={{ color: "#CBD5BE", textShadow: "0 1px 12px rgba(8,16,12,0.5)" }}
               >
                 <span>{t(locale, "shipping.freeThreshold")}</span>
                 <span aria-hidden="true" style={{ opacity: 0.45 }}>·</span>
@@ -164,15 +172,15 @@ export default async function TrailPage() {
           </div>
         </div>
 
-        {/* Scroll cue */}
-        <div className="absolute inset-x-0 bottom-4 flex justify-center pointer-events-none">
-          <div className="flex flex-col items-center gap-1.5 animate-bounce motion-reduce:animate-none">
-            <span className="text-[10px] uppercase tracking-[0.2em]" style={{ color: "rgba(245,244,240,0.6)" }}>
+        {/* Scroll cue — a thin thread of light */}
+        <div className="absolute inset-x-0 bottom-5 hidden md:flex justify-center pointer-events-none">
+          <div className="flex flex-col items-center gap-2.5">
+            <span className="text-[10px] uppercase tracking-[0.24em]" style={{ color: "rgba(245,244,240,0.55)" }}>
               {t(locale, "trail_scroll")}
             </span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="rgba(245,244,240,0.6)" strokeWidth={1.6} className="w-4 h-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
-            </svg>
+            <span className="block w-px h-10" style={{ background: "rgba(245,244,240,0.18)" }}>
+              <span className="trail-scroll-line block w-px h-full" style={{ background: "rgba(250,235,205,0.9)" }} />
+            </span>
           </div>
         </div>
       </section>
