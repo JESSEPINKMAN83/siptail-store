@@ -90,7 +90,10 @@ export default async function TrailPage() {
   return (
     <div style={{ background: "#F5F4F0" }}>
       {/* ── Cinematic hero ──────────────────────────────────────────── */}
-      <section className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: 560 }}>
+      <section
+        className="relative w-full overflow-hidden h-[calc(100svh-130px)] md:h-[calc(100svh-174px)]"
+        style={{ minHeight: 520 }}
+      >
         <div className="absolute inset-0">
           <TrailScene className="w-full h-full" />
         </div>
@@ -112,7 +115,7 @@ export default async function TrailPage() {
         />
 
         <div className="absolute inset-x-0 bottom-0">
-          <div className="max-w-7xl mx-auto px-6 pb-28 md:pb-32">
+          <div className="max-w-7xl mx-auto px-6 pb-20 md:pb-24">
             <div className="max-w-2xl trail-rise">
               <p
                 className="text-[11px] md:text-xs uppercase tracking-[0.22em] mb-4"
