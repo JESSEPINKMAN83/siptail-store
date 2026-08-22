@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { getWixBrowserClient } from "@/lib/wix-client-browser";
+import { serverAddToCart } from "@/app/actions/cart-actions";
 import { useRouter } from "next/navigation";
 import QuestionForm from "./QuestionForm";
 import NewsletterSignup from "./NewsletterSignup";
