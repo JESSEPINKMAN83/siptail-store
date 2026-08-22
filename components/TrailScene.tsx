@@ -120,10 +120,15 @@ export default function TrailScene({ className = "" }: { className?: string }) {
   const scrollRef = useRef(0);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: false });
-    if (!ctx) return;
+    const canvasEl = canvasRef.current;
+    if (!canvasEl) return;
+    // Explicitly non-nullable: TypeScript does not carry `if (!x) return`
+    // narrowing into hoisted function declarations, and every draw helper below
+    // is one.
+    const canvas: HTMLCanvasElement = canvasEl;
+    const ctx2d = canvas.getContext("2d", { alpha: false });
+    if (!ctx2d) return;
+    const ctx: CanvasRenderingContext2D = ctx2d;
 
     const reduced =
       typeof window !== "undefined" &&
@@ -262,8 +267,9 @@ export default function TrailScene({ className = "" }: { className?: string }) {
     }
 
     function rebuildCaches() {
-      skyGrad = ctx.createLinearGradient(0, 0, 0, height * 0.98);
-      for (const [stop, color] of SKY_STOPS) skyGrad.addColorStop(stop, color);
+      const sg = ctx.createLinearGradient(0, 0, 0, height * 0.98);
+      for (const [stop, color] of SKY_STOPS) sg.addColorStop(stop, color);
+      skyGrad = sg;
 
       layerGrads = LAYERS.map((l, i) => {
         const top = l.yBase * height - (l.amps[0] + l.amps[1] + l.amps[2]) - 10;
@@ -298,7 +304,6 @@ export default function TrailScene({ className = "" }: { className?: string }) {
     }
 
     function resize() {
-      if (!canvas) return;
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = canvas.getBoundingClientRect();
       width = Math.max(1, Math.floor(rect.width));
@@ -310,7 +315,8 @@ export default function TrailScene({ className = "" }: { className?: string }) {
     }
 
     function drawSky(w: number, h: number) {
-      if (skyGrad) ctx.fillStyle = skyGrad;
+      const sg = skyGrad;
+      if (sg) ctx.fillStyle = sg;
       ctx.fillRect(0, 0, w, h);
     }
 
@@ -457,7 +463,8 @@ export default function TrailScene({ className = "" }: { className?: string }) {
       const worldOffset = dist * layer.depth;
       const step = layer.depth > 0.8 ? 6 : 10;
 
-      ctx.fillStyle = layerGrads[idx] ?? rgba(LAYER_FILL[idx], 1);
+      const grad: CanvasGradient | undefined = layerGrads[idx];
+      ctx.fillStyle = grad ? grad : rgba(LAYER_FILL[idx], 1);
       ctx.beginPath();
       ctx.moveTo(0, h + 4);
       for (let sx = 0; sx <= w + step; sx += step) {
@@ -531,7 +538,8 @@ export default function TrailScene({ className = "" }: { className?: string }) {
     }
 
     function drawMotes(w: number, h: number, dist: number, t: number) {
-      if (!moteSprite) return;
+      const ms = moteSprite;
+      if (!ms) return;
       ctx.save();
       for (let i = 0; i < 26; i++) {
         const span = 900;
@@ -541,20 +549,21 @@ export default function TrailScene({ className = "" }: { className?: string }) {
         const y = h * (0.58 + hash(i * 8.8) * 0.4) + drift;
         const s = 5 + hash(i * 2.2) * 11;
         ctx.globalAlpha = 0.25 + 0.45 * Math.abs(Math.sin(t * 0.0011 + i));
-        ctx.drawImage(moteSprite, x - s / 2, y - s / 2, s, s);
+        ctx.drawImage(ms, x - s / 2, y - s / 2, s, s);
       }
       ctx.restore();
     }
 
     function drawGrain(w: number, h: number, t: number) {
-      if (!grainPattern) return;
+      const gp = grainPattern;
+      if (!gp) return;
       ctx.save();
       ctx.globalCompositeOperation = "soft-light";
       ctx.globalAlpha = 0.28;
       const ox = Math.floor(t * 0.09) % 128;
       const oy = Math.floor(t * 0.061) % 128;
       ctx.translate(-ox, -oy);
-      ctx.fillStyle = grainPattern;
+      ctx.fillStyle = gp;
       ctx.fillRect(0, 0, w + 128, h + 128);
       ctx.restore();
     }
@@ -590,7 +599,8 @@ export default function TrailScene({ className = "" }: { className?: string }) {
 
       drawMotes(width, height, dist, elapsed);
       drawGrain(width, height, reduced ? 0 : elapsed);
-      if (vignette) ctx.drawImage(vignette, 0, 0);
+      const vg = vignette;
+      if (vg) ctx.drawImage(vg, 0, 0);
 
       if (!reduced) raf = requestAnimationFrame(frame);
     }
