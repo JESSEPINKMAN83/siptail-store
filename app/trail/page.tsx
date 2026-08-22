@@ -72,8 +72,6 @@ export default async function TrailPage() {
     : "Georgia, 'Times New Roman', serif";
 
   const priceIls = ilsFromUsd("$24.99");
-  const align = isHe ? "text-right" : "text-left";
-  const ctaRow = isHe ? "sm:flex-row-reverse" : "sm:flex-row";
 
   const specs = [
     { icon: SPEC_ICONS.volume, label: t(locale, "trail_spec_volume"), value: t(locale, "trail_spec_volume_v") },
@@ -114,8 +112,8 @@ export default async function TrailPage() {
         />
 
         <div className="absolute inset-x-0 bottom-0">
-          <div className="max-w-7xl mx-auto px-6 pb-16 md:pb-24">
-            <div className={`max-w-2xl trail-rise ${align} ${isHe ? "ms-auto" : ""}`}>
+          <div className="max-w-7xl mx-auto px-6 pb-28 md:pb-32">
+            <div className="max-w-2xl trail-rise">
               <p
                 className="text-[11px] md:text-xs uppercase tracking-[0.22em] mb-4"
                 style={{ color: "#EBCFA0", textShadow: "0 1px 14px rgba(10,16,24,0.5)" }}
@@ -123,7 +121,7 @@ export default async function TrailPage() {
                 {t(locale, "trail_eyebrow")}
               </p>
               <h1
-                className="font-bold leading-[1.02] mb-5"
+                className={`font-bold mb-5 ${isHe ? "leading-[1.22]" : "leading-[1.02]"}`}
                 style={{
                   fontFamily: serif,
                   color: "#FBF8F1",
@@ -136,12 +134,12 @@ export default async function TrailPage() {
               </h1>
               <p
                 className="text-base md:text-lg leading-relaxed mb-8 max-w-md"
-                style={{ color: "#E4E7D9", textShadow: "0 1px 16px rgba(8,16,12,0.45)", marginInlineStart: isHe ? "auto" : undefined }}
+                style={{ color: "#E4E7D9", textShadow: "0 1px 16px rgba(8,16,12,0.45)" }}
               >
                 {t(locale, "trail_sub")}
               </p>
 
-              <div className={`flex flex-col ${ctaRow} gap-3 mb-7`}>
+              <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 <Link
                   href={`/products/siptail-trail-bottle?lang=${locale}`}
                   className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center rounded-[3px] shadow-[0_12px_36px_rgba(8,20,12,0.4)] transition-all hover:-translate-y-0.5 hover:opacity-95 touch-manipulation"
@@ -159,7 +157,7 @@ export default async function TrailPage() {
               </div>
 
               <div
-                className={`flex flex-wrap gap-x-5 gap-y-1.5 text-xs ${isHe ? "justify-end" : ""}`}
+                className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs"
                 style={{ color: "#CBD5BE", textShadow: "0 1px 12px rgba(8,16,12,0.5)" }}
               >
                 <span>{t(locale, "shipping.freeThreshold")}</span>
@@ -189,7 +187,7 @@ export default async function TrailPage() {
       <section className="px-6 py-20 md:py-28">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-            <div className={align}>
+            <div>
               <h2
                 className="font-bold leading-tight mb-5"
                 style={{ fontFamily: serif, color: "#1B4332", fontSize: "clamp(1.75rem, 3.4vw, 2.6rem)" }}
@@ -202,8 +200,8 @@ export default async function TrailPage() {
 
               <dl className="grid grid-cols-2 gap-x-6 gap-y-7">
                 {specs.map((s) => (
-                  <div key={String(s.label)} className={isHe ? "text-right" : ""}>
-                    <div className={`flex items-center gap-2 mb-1.5 ${isHe ? "flex-row-reverse justify-start" : ""}`}>
+                  <div key={String(s.label)}>
+                    <div className="flex items-center gap-2 mb-1.5">
                       <span style={{ color: "#4A7C59" }}>{s.icon}</span>
                       <dt className="text-[11px] uppercase tracking-[0.14em]" style={{ color: "#4A7C59" }}>
                         {s.label}
@@ -227,7 +225,7 @@ export default async function TrailPage() {
                 />
               </div>
               <div
-                className={`absolute bottom-0 ${isHe ? "left-0" : "right-0"} px-6 py-5`}
+                className="absolute bottom-0 end-0 px-6 py-5"
                 style={{ background: "#1B4332" }}
               >
                 <p className="text-[10px] uppercase tracking-[0.18em] mb-1" style={{ color: "#A9C9B4" }}>
@@ -244,11 +242,11 @@ export default async function TrailPage() {
 
       {/* ── Shipping contract ───────────────────────────────────────── */}
       <section className="px-6 py-14" style={{ background: "#FFFFFF" }}>
-        <div className={`max-w-7xl mx-auto ${align}`}>
+        <div className="max-w-7xl mx-auto">
           <h3 className="text-sm font-semibold uppercase tracking-[0.16em] mb-5" style={{ color: "#1B4332" }}>
             {t(locale, "shipping.homeDelivery")}
           </h3>
-          <div className={`flex flex-wrap gap-x-10 gap-y-2 text-sm ${isHe ? "justify-end" : ""}`} style={{ color: "#1A1A1A" }}>
+          <div className="flex flex-wrap gap-x-10 gap-y-2 text-sm" style={{ color: "#1A1A1A" }}>
             <span>{t(locale, "shipping.businessDays")}</span>
             <span>{t(locale, "shipping.belowThreshold")}</span>
             <span style={{ color: "#1B4332", fontWeight: 600 }}>{t(locale, "shipping.aboveThreshold")}</span>
