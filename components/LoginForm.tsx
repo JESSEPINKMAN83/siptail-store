@@ -14,41 +14,37 @@ export default function LoginForm() {
     e.preventDefault();
     setError(""); setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Login failed."); return; }
-      router.push("/account");
-      router.refresh();
+      router.push("/account"); router.refresh();
     } catch { setError("Something went wrong. Please try again."); }
     finally { setLoading(false); }
   }
 
+  const inp = "w-full px-4 py-3 border text-sm focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors" />
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#1A1A1A" }}>Email</label>
+        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com"
+          className={inp} style={{ background: "#FFFFFF", borderColor: "#D4E6D4", color: "#1A1A1A" }} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-        <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
-          placeholder="••••••••"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors" />
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#1A1A1A" }}>Password</label>
+        <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••"
+          className={inp} style={{ background: "#FFFFFF", borderColor: "#D4E6D4", color: "#1A1A1A" }} />
       </div>
-      {error && <p className="text-red-500 text-sm bg-red-50 border border-red-100 rounded-lg px-4 py-3">{error}</p>}
+      {error && <p className="text-red-600 text-sm border px-4 py-3" style={{ background: "#FEF2F2", borderColor: "#FECACA" }}>{error}</p>}
       <button type="submit" disabled={loading}
-        className="w-full py-4 bg-[#1B4332] text-white rounded-xl font-bold text-base hover:bg-[#2d5a3d] active:bg-[#143326] transition-colors disabled:opacity-60 touch-manipulation min-h-[52px]">
+        className="w-full py-4 text-sm font-semibold uppercase tracking-wide transition-all touch-manipulation min-h-[52px]"
+        style={{ background: loading ? "#D4E6D4" : "#1B4332", color: loading ? "#1A1A1A" : "#FFFFFF", cursor: loading ? "not-allowed" : "pointer" }}>
         {loading ? "Signing in..." : "Sign In"}
       </button>
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm" style={{ color: "#6B7280" }}>
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-[#1B4332] font-semibold hover:underline">Sign up free</Link>
+        <Link href="/register" className="font-semibold hover:opacity-70 transition-opacity" style={{ color: "#1B4332" }}>Sign up</Link>
       </p>
     </form>
   );

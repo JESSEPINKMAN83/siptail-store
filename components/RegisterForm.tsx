@@ -16,56 +16,48 @@ export default function RegisterForm() {
     e.preventDefault();
     setError(""); setSuccess(""); setLoading(true);
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch("/api/auth/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Registration failed."); return; }
-      if (data.requiresVerification) {
-        setSuccess("Account created! Check your email to verify your address, then sign in.");
-        return;
-      }
-      router.push("/account");
-      router.refresh();
+      if (data.requiresVerification) { setSuccess("Account created! Check your email to verify before signing in."); return; }
+      router.push("/account"); router.refresh();
     } catch { setError("Something went wrong. Please try again."); }
     finally { setLoading(false); }
   }
+
+  const inp = "w-full px-4 py-3 border text-sm focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors";
+  const istyle = { background: "#FFFFFF", borderColor: "#D4E6D4", color: "#1A1A1A" };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">First name</label>
-          <input type="text" value={form.firstName} onChange={set("firstName")} placeholder="Jane"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors" />
+          <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#1A1A1A" }}>First name</label>
+          <input type="text" value={form.firstName} onChange={set("firstName")} placeholder="Jane" className={inp} style={istyle} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Last name</label>
-          <input type="text" value={form.lastName} onChange={set("lastName")} placeholder="Doe"
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors" />
+          <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#1A1A1A" }}>Last name</label>
+          <input type="text" value={form.lastName} onChange={set("lastName")} placeholder="Doe" className={inp} style={istyle} />
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input type="email" required value={form.email} onChange={set("email")} placeholder="you@example.com"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors" />
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#1A1A1A" }}>Email</label>
+        <input type="email" required value={form.email} onChange={set("email")} placeholder="you@example.com" className={inp} style={istyle} />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-        <input type="password" required minLength={6} value={form.password} onChange={set("password")} placeholder="At least 6 characters"
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332] transition-colors" />
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#1A1A1A" }}>Password</label>
+        <input type="password" required minLength={6} value={form.password} onChange={set("password")} placeholder="At least 6 characters" className={inp} style={istyle} />
       </div>
-      {error && <p className="text-red-500 text-sm bg-red-50 border border-red-100 rounded-lg px-4 py-3">{error}</p>}
-      {success && <p className="text-green-700 text-sm bg-green-50 border border-green-100 rounded-lg px-4 py-3">{success}</p>}
+      {error && <p className="text-red-600 text-sm border px-4 py-3" style={{ background: "#FEF2F2", borderColor: "#FECACA" }}>{error}</p>}
+      {success && <p className="text-sm border px-4 py-3" style={{ background: "#F0FDF4", borderColor: "#D4E6D4", color: "#1B4332" }}>{success}</p>}
       <button type="submit" disabled={loading}
-        className="w-full py-4 bg-[#1B4332] text-white rounded-xl font-bold text-base hover:bg-[#2d5a3d] active:bg-[#143326] transition-colors disabled:opacity-60 touch-manipulation min-h-[52px]">
+        className="w-full py-4 text-sm font-semibold uppercase tracking-wide transition-all touch-manipulation min-h-[52px]"
+        style={{ background: loading ? "#D4E6D4" : "#1B4332", color: loading ? "#1A1A1A" : "#FFFFFF", cursor: loading ? "not-allowed" : "pointer" }}>
         {loading ? "Creating account..." : "Create Account"}
       </button>
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm" style={{ color: "#6B7280" }}>
         Already have an account?{" "}
-        <Link href="/login" className="text-[#1B4332] font-semibold hover:underline">Sign in</Link>
+        <Link href="/login" className="font-semibold hover:opacity-70 transition-opacity" style={{ color: "#1B4332" }}>Sign in</Link>
       </p>
     </form>
   );

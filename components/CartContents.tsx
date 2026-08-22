@@ -28,39 +28,24 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
   async function removeItem(id: string) {
     setLoading(true);
     try {
-      const res = await fetch("/api/cart/remove", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lineItemId: id }),
-      });
+      const res = await fetch("/api/cart/remove", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineItemId: id }) });
       if (res.ok) { const d = await res.json(); setCart(d.cart ?? null); }
-    } catch (e) { console.error("[cart] remove failed:", e); }
-    finally { setLoading(false); }
+    } catch (e) { console.error(e); } finally { setLoading(false); }
   }
 
   async function updateQty(id: string, qty: number) {
     if (qty < 1) { await removeItem(id); return; }
     setLoading(true);
     try {
-      const res = await fetch("/api/cart/update-qty", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lineItemId: id, quantity: qty }),
-      });
+      const res = await fetch("/api/cart/update-qty", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineItemId: id, quantity: qty }) });
       if (res.ok) { const d = await res.json(); setCart(d.cart ?? null); }
-    } catch (e) { console.error("[cart] update qty failed:", e); }
-    finally { setLoading(false); }
+    } catch (e) { console.error(e); } finally { setLoading(false); }
   }
 
   function handleCheckout() {
-    // Fire Meta Pixel InitiateCheckout
     if (typeof window !== "undefined" && window.fbq) {
       const subtotalNum = parseFloat(cart?.subtotal?.amount ?? "0") || 0;
-      window.fbq("track", "InitiateCheckout", {
-        value: subtotalNum,
-        currency: "USD",
-        num_items: cart?.lineItems?.reduce((a, i) => a + (i.quantity ?? 0), 0) ?? 0,
-      });
+      window.fbq("track", "InitiateCheckout", { value: subtotalNum, currency: "USD", num_items: cart?.lineItems?.reduce((a, i) => a + (i.quantity ?? 0), 0) ?? 0 });
     }
     setCheckingOut(true);
     router.push("/checkout");
@@ -68,10 +53,9 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
 
   if (isPreview) return (
     <div className="text-center py-20">
-      <div className="text-5xl mb-6">🛒</div>
-      <p className="text-lg text-gray-600 mb-4">Cart preview — Add to Cart is working correctly.</p>
-      <p className="text-sm text-gray-400 mb-8">Connect real Wix products to enable live cart and checkout.</p>
-      <Link href="/products" className="bg-[#1B4332] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#2d5a3d] transition-colors">Continue Shopping</Link>
+      <p className="text-lg mb-4" style={{ color: "#1A1A1A" }}>Cart preview — Add to Cart is working correctly.</p>
+      <p className="text-sm mb-8" style={{ color: "#6B7280" }}>Connect real Wix products to enable live cart.</p>
+      <Link href="/products" className="inline-block px-6 py-3 text-sm font-semibold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>Continue Shopping</Link>
     </div>
   );
 
@@ -79,9 +63,8 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
 
   if (items.length === 0) return (
     <div className="text-center py-20">
-      <div className="text-5xl mb-6">🛒</div>
-      <p className="text-lg text-gray-600 mb-8">Your cart is empty.</p>
-      <Link href="/products" className="bg-[#1B4332] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#2d5a3d] transition-colors">Shop Now</Link>
+      <p className="text-lg mb-8" style={{ color: "#1A1A1A" }}>Your cart is empty.</p>
+      <Link href="/products" className="inline-block px-6 py-3 text-sm font-semibold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>Shop Now</Link>
     </div>
   );
 
@@ -91,41 +74,42 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
         {items.map(item => {
           const id = item._id ?? "u";
           return (
-            <div key={id} className="flex gap-4 bg-white border border-gray-100 rounded-xl p-4">
-              <div className="w-20 h-20 bg-[#F4F4F4] rounded-lg flex items-center justify-center flex-shrink-0">
-                {item.image
-                  ? <img src={item.image} alt={item.productName?.original ?? ""} className="w-full h-full object-cover rounded-lg" />
-                  : <span className="text-3xl">🐾</span>}
+            <div key={id} className="flex gap-4 p-4 border" style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
+              <div className="w-20 h-20 flex items-center justify-center flex-shrink-0" style={{ background: "#F5F4F0" }}>
+                {item.image ? <img src={item.image} alt={item.productName?.original ?? ""} className="w-full h-full object-cover" /> : <span className="text-xs uppercase tracking-wide" style={{ color: "#6B7280" }}>Trail Bottle</span>}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate">{item.productName?.original}</h3>
-                <p className="text-[#1B4332] font-semibold text-sm mb-2">{item.price?.formattedAmount}</p>
+                <h3 className="font-semibold text-sm mb-1 truncate" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>{item.productName?.original}</h3>
+                <p className="font-bold text-sm mb-2" style={{ color: "#1B4332" }}>{item.price?.formattedAmount}</p>
                 <div className="flex items-center gap-2">
                   <button onClick={() => updateQty(id, (item.quantity ?? 1) - 1)} disabled={loading}
-                    className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-400 active:bg-gray-50 disabled:opacity-50 touch-manipulation">−</button>
-                  <span className="text-sm font-medium w-5 text-center">{item.quantity}</span>
+                    className="w-8 h-8 border flex items-center justify-center text-sm font-medium hover:bg-gray-50 disabled:opacity-50 touch-manipulation"
+                    style={{ borderColor: "#D4E6D4", color: "#1A1A1A" }}>−</button>
+                  <span className="text-sm font-medium w-5 text-center" style={{ color: "#1A1A1A" }}>{item.quantity}</span>
                   <button onClick={() => updateQty(id, (item.quantity ?? 1) + 1)} disabled={loading}
-                    className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-400 active:bg-gray-50 disabled:opacity-50 touch-manipulation">+</button>
+                    className="w-8 h-8 border flex items-center justify-center text-sm font-medium hover:bg-gray-50 disabled:opacity-50 touch-manipulation"
+                    style={{ borderColor: "#D4E6D4", color: "#1A1A1A" }}>+</button>
                   <button onClick={() => removeItem(id)} disabled={loading}
-                    className="text-xs text-red-400 hover:text-red-600 transition-colors ml-1 touch-manipulation py-2 px-1">Remove</button>
+                    className="text-xs ml-1 hover:opacity-70 transition-opacity touch-manipulation py-2 px-1"
+                    style={{ color: "#6B7280" }}>Remove</button>
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-
-      <div className="bg-gray-50 rounded-2xl p-6">
+      <div className="p-6 border" style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
         <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-600 font-medium">Subtotal</span>
-          <span className="text-xl font-bold text-gray-900">{cart?.subtotal?.formattedAmount ?? "—"}</span>
+          <span className="font-medium text-sm" style={{ color: "#1A1A1A" }}>Subtotal</span>
+          <span className="text-xl font-bold" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>{cart?.subtotal?.formattedAmount ?? "—"}</span>
         </div>
-        <p className="text-xs text-gray-400 mb-6">Taxes and shipping calculated at checkout.</p>
+        <p className="text-xs mb-6" style={{ color: "#6B7280" }}>Taxes and shipping calculated at checkout.</p>
         <button onClick={handleCheckout} disabled={checkingOut}
-          className="w-full bg-[#1B4332] text-white py-4 rounded-full font-bold text-lg hover:bg-[#2d5a3d] active:bg-[#143326] transition-colors disabled:opacity-60 touch-manipulation min-h-[56px]">
+          className="w-full py-4 text-sm font-semibold uppercase tracking-wide transition-colors touch-manipulation min-h-[52px]"
+          style={{ background: checkingOut ? "#D4E6D4" : "#1B4332", color: checkingOut ? "#1A1A1A" : "#FFFFFF", cursor: checkingOut ? "not-allowed" : "pointer" }}>
           {checkingOut ? "Going to checkout..." : "Proceed to Checkout"}
         </button>
-        <Link href="/products" className="block text-center mt-4 text-sm text-gray-400 hover:text-gray-600 transition-colors py-2">Continue Shopping</Link>
+        <Link href="/products" className="block text-center mt-4 text-xs uppercase tracking-wide hover:opacity-70 transition-opacity py-2" style={{ color: "#6B7280" }}>Continue Shopping</Link>
       </div>
     </div>
   );
