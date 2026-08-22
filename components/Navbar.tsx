@@ -1,7 +1,7 @@
 import Link from "next/link";
 import CartIcon from "./CartIcon";
 import NavbarAuth from "./NavbarAuth";
-import Logo from "./Logo";
+import { LogoHorizontal } from "./Logo";
 
 export default function Navbar() {
   return (
@@ -26,7 +26,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 h-16">
             <Link href="/" className="flex-shrink-0 hover:opacity-80 transition-opacity">
-              <Logo />
+              <LogoHorizontal />
             </Link>
 
             <div className="flex-1 mx-2 sm:mx-6">

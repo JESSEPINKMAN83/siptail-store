@@ -3,7 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import Script from "next/script";
-import Logo from "@/components/Logo";
+import { LogoVertical } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: {
@@ -70,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex justify-center mb-10">
-              <Logo variant="white" />
+              <LogoVertical variant="white" />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
               {[

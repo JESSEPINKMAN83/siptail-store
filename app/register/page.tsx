@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
 import RegisterForm from "@/components/RegisterForm";
-import Logo from "@/components/Logo";
+import { LogoVertical as Logo } from "@/components/Logo";
 
 export default function RegisterPage() {
   return (

@@ -18,12 +18,12 @@ const FALLBACK: AnyProduct[] = [{
 const BADGES = ["Best Seller", "New In", "Staff Pick", "Top Rated"];
 
 const CATEGORIES = [
-  { icon: "◎", label: "Hydration", href: "/products?cat=hydration" },
-  { icon: "▲", label: "Trail & Hike", href: "/products?cat=trail-hike" },
-  { icon: "◈", label: "Dog Safety", href: "/products?cat=dog-safety" },
-  { icon: "⬡", label: "Walk Gear", href: "/products?cat=walk-gear" },
-  { icon: "◉", label: "Active & Sport", href: "/products?cat=active" },
-  { icon: "◇", label: "Gift Ideas", href: "/products?cat=gifts" },
+  { icon: "H", label: "Hydration", href: "/products?cat=hydration" },
+  { icon: "T", label: "Trail & Hike", href: "/products?cat=trail-hike" },
+  { icon: "S", label: "Dog Safety", href: "/products?cat=dog-safety" },
+  { icon: "W", label: "Walk Gear", href: "/products?cat=walk-gear" },
+  { icon: "A", label: "Active & Sport", href: "/products?cat=active" },
+  { icon: "G", label: "Gift Ideas", href: "/products?cat=gifts" },
 ];
 
 async function fetchProducts(): Promise<AnyProduct[]> {
@@ -166,10 +166,10 @@ export default async function HomePage() {
       <section className="py-10 px-4 border-t" style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {[
-            { icon: "→", title: "Free US Shipping", desc: "Orders over $50" },
-            { icon: "↩", title: "30-Day Returns", desc: "No-hassle policy" },
-            { icon: "✓", title: "BPA-Free & Safe", desc: "Vet approved materials" },
-            { icon: "◎", title: "Trail Tested", desc: "Built for real adventures" },
+            { icon: "+", title: "Free US Shipping", desc: "Orders over $50" },
+            { icon: "<", title: "30-Day Returns", desc: "No-hassle policy" },
+            { icon: "V", title: "BPA-Free & Safe", desc: "Vet approved materials" },
+            { icon: "O", title: "Trail Tested", desc: "Built for real adventures" },
           ].map(t => (
             <div key={t.title} className="flex flex-col items-center gap-1 p-3">
               <span className="text-lg font-bold mb-1" style={{ color: "#1B4332" }}>{t.icon}</span>
