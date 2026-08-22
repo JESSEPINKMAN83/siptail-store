@@ -56,21 +56,16 @@ export default function ProductPageClient({ product, related }: { product: Produ
     if (!product.isLive) { router.push("/cart?preview=1"); return; }
     setAdding(true);
     try {
-      const c = getWixBrowserClient();
-      await c.currentCart.addToCurrentCart({
-        lineItems: [{
-          catalogReference: {
-            appId: "1380b703-ce81-ff05-f115-39571d94dfcd",
-            catalogItemId: product.id,
-            options: selectedVariant ? { variantId: selectedVariant } : {},
-          },
-          quantity: qty,
-        }],
-      });
+      const result = await serverAddToCart(product.id, selectedVariant || null, qty);
+      if (!result.ok) {
+        console.error("[ProductPage] add to cart error:", result.error);
+        alert("Could not add to cart. Please try again.");
+        return;
+      }
       setAdded(true);
-      setTimeout(() => setAdded(false), 2000);
+      setTimeout(() => setAdded(false), 2500);
       router.refresh();
-    } catch (e) { console.error(e); alert("Could not add to cart. Please try again."); }
+    } catch (e) { console.error("[ProductPage] add to cart unexpected:", e); alert("Could not add to cart. Please try again."); }
     finally { setAdding(false); }
   }
 
