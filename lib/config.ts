@@ -45,3 +45,13 @@ export function ilsFromUsd(usdStr: string | null | undefined): string {
   const ils = Math.round(usd * WE_CONFIG.USD_TO_ILS_RATE);
   return `₪${ils}`;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Real Wix Stores product — created 2026-08-23
+// ─────────────────────────────────────────────────────────────────────────────
+export const SIPTAIL_PRODUCT_ID = "62ebc9f7-1e77-4595-aa6b-53aa6c225c70";
+export const SIPTAIL_VARIANTS = {
+  "Small 350ml":  "b3e03437-f927-469b-838c-f97ac95f1113",
+  "Medium 500ml": "f0acd754-f579-44a6-bc49-48338a21d3fd",
+  "Large 750ml":  "aee61163-df5c-4ae3-bdd1-acdc07806f39",
+} as const;
