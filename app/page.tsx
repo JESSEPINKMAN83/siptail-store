@@ -89,8 +89,8 @@ export default async function HomePage() {
       {/* Hero — WE-20 additions below CTAs */}
       <section className="px-4 py-20 md:py-28">
         <div className="max-w-7xl mx-auto">
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${isHe ? "md:direction-rtl" : ""}`}>
-            <div className={isHe ? "text-right" : ""}>
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center`}>
+            <div className={isHe ? "text-right" : ""} style={isHe ? { order: 2 } : undefined}>
               <p className="text-xs uppercase tracking-widest mb-4 font-medium" style={{ color: "#1B4332" }}>
                 {isHe ? "קולקציית העונה החדשה" : "New season collection"}
               </p>
@@ -120,7 +120,7 @@ export default async function HomePage() {
                 <span>✓ {t(locale, "shipping.leadTime")}</span>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative" style={isHe ? { order: 1 } : undefined}>
               <div className="aspect-square overflow-hidden" style={{ background: "#FFFFFF" }}>
                 <img
                   src={PRODUCT_PHOTOS[0]}

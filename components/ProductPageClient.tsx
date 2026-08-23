@@ -278,11 +278,11 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
           {product.images.length > 1 && (
             <>
               <button onClick={() => setMobileImg(i => (i - 1 + product.images.length) % product.images.length)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 flex items-center justify-center shadow-sm touch-manipulation">
+                className="absolute top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 flex items-center justify-center shadow-sm touch-manipulation" style={{ [isHe ? "right" : "left"]: "0.5rem" }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
               <button onClick={() => setMobileImg(i => (i + 1) % product.images.length)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 flex items-center justify-center shadow-sm touch-manipulation">
+                className="absolute top-1/2 -translate-y-1/2 w-9 h-9 bg-white/80 flex items-center justify-center shadow-sm touch-manipulation" style={{ [isHe ? "left" : "right"]: "0.5rem" }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
             </>
@@ -363,7 +363,7 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
       </div>
 
       {/* Mobile sticky bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t px-4 py-3 flex items-center gap-3 shadow-lg" style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-40 border-t px-4 py-3 flex items-center gap-3 shadow-lg ${isHe ? "flex-row-reverse" : ""}`} style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
         <div className={`flex items-center border flex-shrink-0 ${isHe ? "flex-row-reverse" : ""}`} style={{ borderColor: "#D4E6D4" }}>
           <button onClick={() => setQty(q => Math.max(1, q - 1))} className="px-3 py-2 text-lg font-medium touch-manipulation min-h-[44px] min-w-[40px]" style={{ color: "#1A1A1A" }}>−</button>
           <span className="px-3 py-2 text-sm font-semibold border-x min-w-[36px] text-center" style={{ borderColor: "#D4E6D4", color: "#1A1A1A" }}>{qty}</span>

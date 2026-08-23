@@ -28,3 +28,14 @@ h1, h2, h3, h4 {
   scrollbar-width: none;
 }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* RTL: disable letter-spacing on Hebrew text (Hebrew doesn't use it) */
+:lang(he) h1, :lang(he) h2, :lang(he) h3, :lang(he) h4,
+:lang(he) .tracking-wide, :lang(he) .tracking-widest {
+  letter-spacing: 0 !important;
+}
+
+/* RTL logical property overrides */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
