@@ -39,6 +39,33 @@ const SPEC_ICONS = {
   ),
 };
 
+const PILLAR_ICONS = {
+  hydration: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3s5.5 6 5.5 9.6A5.5 5.5 0 016.5 12.6C6.5 9 12 3 12 3z" />
+      <path strokeLinecap="round" d="M9.4 13.2a2.7 2.7 0 002.3 2.6" />
+    </svg>
+  ),
+  gear: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10a3 3 0 013 3v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a3 3 0 013-3z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 8V6a3 3 0 016 0v2M9 13h6" />
+    </svg>
+  ),
+  visibility: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+      <circle cx="12" cy="12" r="3.2" />
+      <path strokeLinecap="round" d="M12 3v2.4M12 18.6V21M21 12h-2.4M5.4 12H3M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7M18.4 18.4l-1.7-1.7M7.3 7.3L5.6 5.6" />
+    </svg>
+  ),
+  dog: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 17v-3.5a4.5 4.5 0 014.5-4.5H14l3-2.5V11l2 1.2V17" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 17v3M17 17v3M11 17v3" />
+    </svg>
+  ),
+};
+
 const TRUST_ICONS = {
   secure: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
@@ -78,6 +105,19 @@ export default async function TrailPage() {
     { icon: SPEC_ICONS.weight, label: t(locale, "trail_spec_weight"), value: t(locale, "trail_spec_weight_v") },
     { icon: SPEC_ICONS.material, label: t(locale, "trail_spec_material"), value: t(locale, "trail_spec_material_v") },
     { icon: SPEC_ICONS.seal, label: t(locale, "trail_spec_seal"), value: t(locale, "trail_spec_seal_v") },
+  ];
+
+  const why = [
+    { t: t(locale, "trail_why_1_t"), b: t(locale, "trail_why_1_b") },
+    { t: t(locale, "trail_why_2_t"), b: t(locale, "trail_why_2_b") },
+    { t: t(locale, "trail_why_3_t"), b: t(locale, "trail_why_3_b") },
+  ];
+
+  const pillars = [
+    { icon: PILLAR_ICONS.hydration,  t: t(locale, "trail_p1_t"), b: t(locale, "trail_p1_b"), href: `/products?cat=hydration&lang=${locale}` },
+    { icon: PILLAR_ICONS.gear,       t: t(locale, "trail_p2_t"), b: t(locale, "trail_p2_b"), href: `/products?cat=walk-gear&lang=${locale}` },
+    { icon: PILLAR_ICONS.visibility, t: t(locale, "trail_p3_t"), b: t(locale, "trail_p3_b"), href: `/products?cat=dog-safety&lang=${locale}` },
+    { icon: PILLAR_ICONS.dog,        t: t(locale, "trail_p4_t"), b: t(locale, "trail_p4_b"), href: `/products?cat=trail-hike&lang=${locale}` },
   ];
 
   const trust = [
@@ -186,11 +226,80 @@ export default async function TrailPage() {
         </div>
       </section>
 
-      {/* ── Story + specs ───────────────────────────────────────────── */}
-      <section className="px-6 py-20 md:py-28">
+      {/* ── The case for walking ────────────────────────────────────── */}
+      <section className="px-6 py-20 md:py-24" style={{ background: "#FFFFFF" }}>
+        <div className="max-w-7xl mx-auto">
+          <h2
+            className="font-bold mb-12"
+            style={{ fontFamily: serif, color: "#1B4332", fontSize: "clamp(1.6rem, 3vw, 2.3rem)" }}
+          >
+            {t(locale, "trail_why_title")}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
+            {why.map((w) => (
+              <div key={String(w.t)} className="border-t pt-5" style={{ borderColor: "#D4E6D4" }}>
+                <h3
+                  className="text-lg font-bold mb-2"
+                  style={{ fontFamily: serif, color: "#1A1A1A" }}
+                >
+                  {w.t}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#55584F" }}>
+                  {w.b}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── What makes a walk better — the store's pillars ──────────── */}
+      <section className="px-6 py-20 md:py-24">
+        <div className="max-w-7xl mx-auto">
+          <div className="max-w-2xl mb-12">
+            <h2
+              className="font-bold mb-4"
+              style={{ fontFamily: serif, color: "#1B4332", fontSize: "clamp(1.75rem, 3.4vw, 2.6rem)" }}
+            >
+              {t(locale, "trail_pillars_title")}
+            </h2>
+            <p className="text-base leading-relaxed" style={{ color: "#1A1A1A" }}>
+              {t(locale, "trail_pillars_sub")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: "#D4E6D4" }}>
+            {pillars.map((pl) => (
+              <Link
+                key={String(pl.t)}
+                href={pl.href}
+                className="group flex flex-col gap-3 p-7 transition-colors hover:bg-[#EDEBE3] touch-manipulation"
+                style={{ background: "#F5F4F0" }}
+              >
+                <span style={{ color: "#4A7C59" }}>{pl.icon}</span>
+                <h3 className="text-base font-bold" style={{ fontFamily: serif, color: "#1A1A1A" }}>
+                  {pl.t}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#55584F" }}>
+                  {pl.b}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Featured gear ───────────────────────────────────────────── */}
+      <section className="px-6 py-20 md:py-28" style={{ background: "#FFFFFF" }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
             <div>
+              <p
+                className="text-[11px] uppercase tracking-[0.2em] mb-4"
+                style={{ color: "#4A7C59" }}
+              >
+                {t(locale, "trail_featured_eyebrow")}
+              </p>
               <h2
                 className="font-bold leading-tight mb-5"
                 style={{ fontFamily: serif, color: "#1B4332", fontSize: "clamp(1.75rem, 3.4vw, 2.6rem)" }}
@@ -244,7 +353,7 @@ export default async function TrailPage() {
       </section>
 
       {/* ── Shipping contract ───────────────────────────────────────── */}
-      <section className="px-6 py-14" style={{ background: "#FFFFFF" }}>
+      <section className="px-6 py-14" style={{ background: "#F5F4F0" }}>
         <div className="max-w-7xl mx-auto">
           <h3 className="text-sm font-semibold uppercase tracking-[0.16em] mb-5" style={{ color: "#1B4332" }}>
             {t(locale, "shipping.homeDelivery")}
@@ -261,7 +370,7 @@ export default async function TrailPage() {
       </section>
 
       {/* ── Trust strip ─────────────────────────────────────────────── */}
-      <section className="px-6 py-12 border-t" style={{ background: "#F5F4F0", borderColor: "#D4E6D4" }}>
+      <section className="px-6 py-12 border-t" style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-5 text-center">
           {trust.map((item) => (
             <div key={String(item.label)} className="flex flex-col items-center gap-2.5">
