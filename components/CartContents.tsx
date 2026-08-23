@@ -2,6 +2,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { Locale } from "@/lib/translations";
+import { t } from "@/lib/translations";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -19,7 +21,7 @@ interface CartData {
   subtotal?: { formattedAmount?: string | null; amount?: string | null } | null;
 }
 
-export default function CartContents({ initialCart, isPreview }: { initialCart: unknown; isPreview?: boolean }) {
+export default function CartContents({ initialCart, isPreview, locale = 'en' }: { initialCart: unknown; isPreview?: boolean; locale?: Locale }) {
   const [cart, setCart] = useState<CartData | null>(initialCart as CartData | null);
   const [loading, setLoading] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -55,7 +57,7 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
     <div className="text-center py-20">
       <p className="text-lg mb-4" style={{ color: "#1A1A1A" }}>Cart preview — Add to Cart is working correctly.</p>
       <p className="text-sm mb-8" style={{ color: "#6B7280" }}>Connect real Wix products to enable live cart.</p>
-      <Link href="/products" className="inline-block px-6 py-3 text-sm font-semibold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>Continue Shopping</Link>
+      <Link href="/products" className="inline-block px-6 py-3 text-sm font-semibold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>{t(locale, "continue_shopping")}</Link>
     </div>
   );
 
@@ -64,7 +66,7 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
   if (items.length === 0) return (
     <div className="text-center py-20">
       <p className="text-lg mb-8" style={{ color: "#1A1A1A" }}>Your cart is empty.</p>
-      <Link href="/products" className="inline-block px-6 py-3 text-sm font-semibold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>Shop Now</Link>
+      <Link href="/products" className="inline-block px-6 py-3 text-sm font-semibold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>{t(locale, "shop_now")}</Link>
     </div>
   );
 
@@ -107,9 +109,9 @@ export default function CartContents({ initialCart, isPreview }: { initialCart: 
         <button onClick={handleCheckout} disabled={checkingOut}
           className="w-full py-4 text-sm font-semibold uppercase tracking-wide transition-colors touch-manipulation min-h-[52px]"
           style={{ background: checkingOut ? "#D4E6D4" : "#1B4332", color: checkingOut ? "#1A1A1A" : "#FFFFFF", cursor: checkingOut ? "not-allowed" : "pointer" }}>
-          {checkingOut ? "Going to checkout..." : "Proceed to Checkout"}
+          {checkingOut ? t(locale, "going_to_checkout") : t(locale, "checkout")}
         </button>
-        <Link href="/products" className="block text-center mt-4 text-xs uppercase tracking-wide hover:opacity-70 transition-opacity py-2" style={{ color: "#6B7280" }}>Continue Shopping</Link>
+        <Link href="/products" className="block text-center mt-4 text-xs uppercase tracking-wide hover:opacity-70 transition-opacity py-2" style={{ color: "#6B7280" }}>{t(locale, "continue_shopping")}</Link>
       </div>
     </div>
   );
