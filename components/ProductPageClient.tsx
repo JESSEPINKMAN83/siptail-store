@@ -75,19 +75,21 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
   const priceNum = parseFloat((sel?.rawPrice ?? sel?.price ?? "0").replace(/[^0-9.]/g, "")) || 0;
 
   async function handleAddToCart() {
-    if (!product.isLive) { router.push("/cart?preview=1"); return; }
     setAdding(true);
     try {
       const result = await serverAddToCart(product.id, selectedVariant || null, qty);
-      if (!result.ok) { alert(isHe ? "לא ניתן להוסיף לסל. נסה שנית." : "Could not add to cart. Please try again."); return; }
+      if (!result.ok) {
+        console.error("[ProductPage] add to cart error:", result.error);
+        setAdding(false);
+        return;
+      }
       if (typeof window !== "undefined" && window.fbq) {
-        // WE-21: ILS currency for Hebrew, USD for English
         window.fbq("track", "AddToCart", { value: priceNum, currency: isHe ? "ILS" : "USD", content_ids: [product.id], content_name: product.name, content_type: "product" });
       }
       setAdded(true);
-      setTimeout(() => setAdded(false), 2500);
       router.refresh();
-    } catch (e) { console.error(e); }
+      setTimeout(() => router.push("/cart"), 800);
+    } catch (e) { console.error("[ProductPage] unexpected:", e); }
     finally { setAdding(false); }
   }
 

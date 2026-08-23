@@ -53,13 +53,8 @@ export default function CartContents({ initialCart, isPreview, locale = 'en' }: 
     router.push("/checkout");
   }
 
-  if (isPreview) return (
-    <div className="text-center py-20">
-      <p className="text-lg mb-4" style={{ color: "#1A1A1A" }}>Cart preview — Add to Cart is working correctly.</p>
-      <p className="text-sm mb-8" style={{ color: "#6B7280" }}>Connect real Wix products to enable live cart.</p>
-      <Link href="/products" className="inline-block px-6 py-3 text-sm font-semibold uppercase tracking-wide" style={{ background: "#1B4332", color: "#FFFFFF" }}>{t(locale, "continue_shopping")}</Link>
-    </div>
-  );
+  // Preview mode removed — cart always shows real state
+
 
   const items = cart?.lineItems ?? [];
 

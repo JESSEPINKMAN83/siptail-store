@@ -3,15 +3,12 @@ import { useState } from "react";
 import { serverAddToCart } from "@/app/actions/cart-actions";
 import { useRouter } from "next/navigation";
 
-declare global {
-  // eslint-disable-next-line no-var
-  var fbq: ((...args: unknown[]) => void) | undefined;
-}
+declare global { var fbq: ((...args: unknown[]) => void) | undefined; }
 
 interface Variant { id: string; label: string; price: string; }
 interface Props { productId: string; productName: string; variants: Variant[]; isLive: boolean; }
 
-export default function AddToCartButton({ productId, productName, variants, isLive }: Props) {
+export default function AddToCartButton({ productId, productName, variants }: Props) {
   const [selected, setSelected] = useState(variants[0]?.id || "");
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
@@ -21,30 +18,46 @@ export default function AddToCartButton({ productId, productName, variants, isLi
   const priceNum = sel?.price ? parseFloat(sel.price.replace(/[^0-9.]/g, "")) || 0 : 0;
 
   async function handleAdd() {
-    if (!isLive) { router.push("/cart?preview=1"); return; }
-    setLoading(true); setError("");
+    setLoading(true);
+    setError("");
     try {
       const result = await serverAddToCart(productId, selected || null, 1);
-      if (!result.ok) { setError("Could not add to cart. Please try again."); return; }
+      if (!result.ok) {
+        // Product not in Wix catalog yet — show a helpful message
+        setError(result.error?.includes("not found") || result.error?.includes("catalog")
+          ? "This product isn't available for purchase yet. Check back soon."
+          : "Could not add to cart. Please try again.");
+        console.error("[AddToCart] error:", result.error);
+        return;
+      }
       if (typeof window !== "undefined" && window.fbq) {
-        window.fbq("track", "AddToCart", { value: priceNum, currency: "USD", content_ids: [productId], content_name: productName, content_type: "product" });
+        window.fbq("track", "AddToCart", {
+          value: priceNum, currency: "USD",
+          content_ids: [productId], content_name: productName, content_type: "product",
+        });
       }
       setAdded(true);
       setTimeout(() => setAdded(false), 2500);
       router.refresh();
-    } catch (e) { console.error(e); setError("Could not add to cart. Please try again."); }
-    finally { setLoading(false); }
+      // Navigate to cart after success
+      router.push("/cart");
+    } catch (e) {
+      console.error("[AddToCart] unexpected:", e);
+      setError("Could not add to cart. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {variants.length > 1 && (
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "#1A1A1A" }}>Size</label>
           <div className="flex flex-wrap gap-2">
             {variants.map(v => (
               <button key={v.id} onClick={() => setSelected(v.id)}
-                className="px-4 py-2 text-sm font-medium transition-colors touch-manipulation min-h-[44px] border"
+                className={`px-4 py-2 text-sm font-medium transition-colors touch-manipulation min-h-[44px] border`}
                 style={{
                   background: selected === v.id ? "#1B4332" : "#FFFFFF",
                   color: selected === v.id ? "#FFFFFF" : "#1A1A1A",
@@ -57,15 +70,15 @@ export default function AddToCartButton({ productId, productName, variants, isLi
         </div>
       )}
       <button onClick={handleAdd} disabled={loading}
-        className="w-full py-4 px-8 font-semibold text-sm uppercase tracking-wide transition-all touch-manipulation min-h-[52px]"
+        className="w-full py-4 px-8 font-semibold text-sm uppercase tracking-wide transition-all touch-manipulation min-h-[56px]"
         style={{
           background: added ? "#4A7C59" : loading ? "#D4E6D4" : "#1B4332",
-          color: loading ? "#1A1A1A" : "#FFFFFF",
+          color: (loading && !added) ? "#1A1A1A" : "#FFFFFF",
           cursor: loading ? "not-allowed" : "pointer",
         }}>
         {added ? "Added to Cart ✓" : loading ? "Adding..." : `Add to Cart${sel?.price ? ` — ${sel.price}` : ""}`}
       </button>
-      {error && <p className="text-red-600 text-sm text-center">{error}</p>}
+      {error && <p className="text-red-600 text-sm text-center bg-red-50 px-3 py-2">{error}</p>}
     </div>
   );
 }
