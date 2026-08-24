@@ -55,6 +55,15 @@ export const translations = {
     "pdp.tabs.reviews": "Reviews",
     "pdp.tabs.shipping": "Shipping & returns",
     "a11y.statement": "Accessibility statement",
+    // Product-specific — SipTail Trail Bottle
+    "product.siptail.name": "SipTail Trail Bottle",
+    "product.siptail.description": "Volume: 500ml · Weight: 180g · Material: BPA-free food-grade HDPE + silicone\n\nThe perfect portable water bottle for walks and hikes with your dog. Squeeze-to-fill, the bowl fills automatically. Release and unused water flows back. Leak-proof rotational lock. Adjustable carry strap.",
+    "product.siptail.variant.small": "Small 350ml",
+    "product.siptail.variant.medium": "Medium 500ml",
+    "product.siptail.variant.large": "Large 750ml",
+    "product.select_size": "Select size",
+    "product.in_stock": "In stock",
+    "product.only_few_left": "Only a few left",
   },
   he: {
     nav_home: "בית", nav_shop: "חנות", nav_blog: "בלוג", nav_about: "אודות",
@@ -110,6 +119,15 @@ export const translations = {
     "pdp.tabs.reviews": "ביקורות",
     "pdp.tabs.shipping": "משלוחים והחזרות",
     "a11y.statement": "הצהרת נגישות",
+    // Product-specific — SipTail Trail Bottle
+    "product.siptail.name": "בקבוק מים SipTail Trail",
+    "product.siptail.description": "נפח: 500 מ\"ל\nמשקל: 180 גרם\nחומר: HDPE בדרגת מזון, נטול BPA\nאטימה: מכסה סיליקון אטום — לא נשפך בתיק\n\nכל טיול טוב מתחיל בהכנה נכונה. בקבוק SipTail Trail נועד בדיוק לזה — קל, אטום לחלוטין, ומחזיק 500 מ\"ל שיספיקו לכם ולכלב לאורך כל השביל. שתייה קלה בלחיצה אחת, ניקוי בשנייה.",
+    "product.siptail.variant.small": "קטן 350 מ\"ל",
+    "product.siptail.variant.medium": "בינוני 500 מ\"ל",
+    "product.siptail.variant.large": "גדול 750 מ\"ל",
+    "product.select_size": "בחר גודל",
+    "product.in_stock": "במלאי",
+    "product.only_few_left": "נותרו מעט",
   },
 } as const;
 

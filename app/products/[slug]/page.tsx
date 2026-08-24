@@ -82,6 +82,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const locale = await getLocale();
   const isHe = locale === "he";
 
+  // Hebrew product content overrides — applied regardless of Wix API response
+  // This ensures Hebrew users always see native copy without requiring Wix Multilingual
+  const HE_OVERRIDES = {
+    name: t(locale, "product.siptail.name" as TranslationKey),
+    description: t(locale, "product.siptail.description" as TranslationKey),
+    variantLabels: {
+      "Small 350ml":  t(locale, "product.siptail.variant.small" as TranslationKey),
+      "Medium 500ml": t(locale, "product.siptail.variant.medium" as TranslationKey),
+      "Large 750ml":  t(locale, "product.siptail.variant.large" as TranslationKey),
+    },
+  };
+
   const wixProduct = await fetchProduct(slug);
   // Always use real product ID — fallback only if API is down
   const p: AnyProduct = wixProduct ?? (isHe ? FALLBACK_HE : FALLBACK_EN);
@@ -104,7 +116,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const displayVariants = rawVariants.map(v => ({
     id: getVariantId(v),
-    label: Object.values(v.choices ?? {}).join(" / "),
+    label: (() => {
+      const raw = Object.values(v.choices ?? {}).join(" / ");
+      return isHe ? (HE_OVERRIDES.variantLabels[raw as keyof typeof HE_OVERRIDES.variantLabels] ?? raw) : raw;
+    })(),
     price: isHe
       ? ilsFromUsd(`$${getVariantPrice(v)}`)
       : `$${getVariantPrice(v)}`,
@@ -160,9 +175,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <ProductPageClient
           product={{
             id: productId,
-            name: p.name ?? "SipTail Trail Bottle",
+            name: isHe ? HE_OVERRIDES.name : (p.name ?? "SipTail Trail Bottle"),
             slug: p.slug ?? slug,
-            description,
+            description: isHe ? HE_OVERRIDES.description : description,
             basePrice,
             isLive: true, // always true — real product ID is always used
             images,
