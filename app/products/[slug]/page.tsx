@@ -85,12 +85,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   // Hebrew product content overrides — applied regardless of Wix API response
   // This ensures Hebrew users always see native copy without requiring Wix Multilingual
   const HE_OVERRIDES = {
-    name: t(locale, "product.siptail.name" as TranslationKey),
-    description: t(locale, "product.siptail.description" as TranslationKey),
+    name: t(locale, "product.siptail.name" as any),
+    description: t(locale, "product.siptail.description" as any),
     variantLabels: {
-      "Small 350ml":  t(locale, "product.siptail.variant.small" as TranslationKey),
-      "Medium 500ml": t(locale, "product.siptail.variant.medium" as TranslationKey),
-      "Large 750ml":  t(locale, "product.siptail.variant.large" as TranslationKey),
+      "Small 350ml":  t(locale, "product.siptail.variant.small" as any),
+      "Medium 500ml": t(locale, "product.siptail.variant.medium" as any),
+      "Large 750ml":  t(locale, "product.siptail.variant.large" as any),
     },
   };
 
