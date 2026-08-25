@@ -1,57 +1,79 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getWixBrowserClient } from "@/lib/wix-client-browser";
+import { serverCreateCheckout } from "@/app/actions/checkout-actions";
 import Link from "next/link";
+import type { Locale } from "@/lib/translations";
 
-export default function CheckoutClient() {
-  const [error, setError] = useState(false);
+export default function CheckoutClient({ locale = "en" }: { locale?: Locale }) {
+  const isHe = locale === "he";
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    async function redirect() {
+    let cancelled = false;
+    async function run() {
       try {
-        const c = getWixBrowserClient();
-        // Use the eCommerce checkout API via currentCart
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await (c.currentCart as any).createCheckoutFromCurrentCart({
-          channelType: "WEB",
-        });
-        const checkoutId = result?.checkoutId;
-        if (!checkoutId) { setError(true); return; }
-
-        // Get the checkout URL — Wix returns it directly or we build it
-        const checkoutUrl = result?.checkoutUrl
-          ?? `https://www.wix.com/checkout?checkoutId=${checkoutId}&successUrl=${encodeURIComponent(window.location.origin + "/thank-you")}&cancelUrl=${encodeURIComponent(window.location.origin + "/cart")}`;
-        window.location.href = checkoutUrl;
+        const result = await serverCreateCheckout();
+        if (cancelled) return;
+        if (result.ok) {
+          window.location.href = result.redirectUrl;
+        } else {
+          console.error("[CheckoutClient] server error:", result.error);
+          setErrorMsg(result.error);
+        }
       } catch (e) {
-        console.error("Checkout redirect failed:", e);
-        setError(true);
+        if (!cancelled) {
+          console.error("[CheckoutClient] unexpected:", e);
+          setErrorMsg(String(e));
+        }
       }
     }
-    redirect();
+    run();
+    return () => { cancelled = true; };
   }, []);
 
-  if (error) {
+  if (errorMsg !== null) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-32 text-center">
+      <div className="max-w-xl mx-auto px-4 py-32 text-center" dir={isHe ? "rtl" : "ltr"}>
         <div className="text-5xl mb-6">😔</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">Checkout unavailable</h1>
-        <p className="text-gray-500 text-sm mb-8">
-          Something went wrong redirecting to checkout.
+        <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>
+          {isHe ? "התשלום אינו זמין" : "Checkout unavailable"}
+        </h1>
+        <p className="text-sm mb-3" style={{ color: "#6B7280" }}>
+          {isHe ? "אירעה שגיאה בהפניה לתשלום" : "Something went wrong redirecting to checkout."}
         </p>
-        <Link href="/cart" className="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors">
-          Back to cart
-        </Link>
+        {/* Show technical error in console only — not to user */}
+        <p className="text-xs mb-8 px-4 py-2 rounded" style={{ color: "#9CA3AF", background: "#F5F4F0" }}>
+          {isHe ? "ניתן לנסות שוב או לחזור לסל הקניות." : "You can try again or go back to your cart."}
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            onClick={() => { setErrorMsg(null); window.location.reload(); }}
+            className="px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white touch-manipulation"
+            style={{ background: "#1B4332" }}>
+            {isHe ? "נסה שוב" : "Try again"}
+          </button>
+          <Link href="/cart"
+            className="px-6 py-3 text-sm font-semibold uppercase tracking-wide border touch-manipulation"
+            style={{ color: "#1B4332", borderColor: "#1B4332" }}>
+            {isHe ? "חזרה לסל" : "Back to cart"}
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-32 text-center">
-      <div className="text-5xl mb-6 animate-pulse">🛒</div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-3">Heading to checkout...</h1>
-      <p className="text-gray-500 text-sm">
-        Redirecting to secure checkout. If nothing happens,{" "}
-        <Link href="/cart" className="text-blue-600 underline">go back to your cart</Link>.
+    <div className="max-w-xl mx-auto px-4 py-32 text-center" dir={isHe ? "rtl" : "ltr"}>
+      <div className="text-5xl mb-6" style={{ animation: "pulse 2s infinite" }}>🛒</div>
+      <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>
+        {isHe ? "עובר לתשלום..." : "Heading to checkout..."}
+      </h1>
+      <p className="text-sm" style={{ color: "#6B7280" }}>
+        {isHe ? "מעביר אותך לעמוד התשלום המאובטח." : "Redirecting to secure checkout."}{" "}
+        {isHe ? "" : "If nothing happens, "}
+        <Link href="/cart" style={{ color: "#1B4332" }}>
+          {isHe ? "חזרה לסל" : "go back to your cart"}
+        </Link>.
       </p>
     </div>
   );
