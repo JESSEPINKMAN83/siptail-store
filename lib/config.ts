@@ -23,15 +23,16 @@ export const WE_CONFIG = {
   // Product images — CJJJCWGY00675 (Portable dog water bottle 520ml)
   // TODO: Replace with actual CJ CDN URLs once bot-protection bypassed
   // These are real dog/bottle photos from public sources
-  // PRODUCT_IMAGES: Real CJ product images — update these with actual CJ CDN URLs
-  // Current: high-quality public domain dog/water bottle images from Pexels
-  // TODO: Replace with official CJ CDN URLs from CJJJCWGY00675 when accessible
+  // PRODUCT_IMAGES: Wix-hosted product images (uploaded to static.wixstatic.com)
+  // First 2 are real images already on the Wix CDN.
+  // TODO: Replace positions 3-5 with actual CJ CJJJCWGY00675 CDN URLs when available.
+  // To get CJ URLs: log into cjdropshipping.com → My Products → right-click images → Copy image address
   PRODUCT_IMAGES: [
-    "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=800", // dog portrait outdoors
-    "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=800", // dog on trail
-    "https://images.pexels.com/photos/2253275/pexels-photo-2253275.jpeg?auto=compress&cs=tinysrgb&w=800", // dog hiking
-    "https://images.pexels.com/photos/1254140/pexels-photo-1254140.jpeg?auto=compress&cs=tinysrgb&w=800", // dog active outdoor
-    "https://images.pexels.com/photos/356378/pexels-photo-356378.jpeg?auto=compress&cs=tinysrgb&w=800",   // dog nature
+    "https://static.wixstatic.com/media/70d502_6f9c72717a5c4e79b164c77b6b9f7551~mv2.jpg", // Wix CDN — real product image 1
+    "https://static.wixstatic.com/media/70d502_96ef2f76e9934a03897754717970efbd~mv2.jpg", // Wix CDN — real product image 2
+    "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=800", // placeholder — replace with CJ
+    "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=800", // placeholder — replace with CJ
+    "https://images.pexels.com/photos/2253275/pexels-photo-2253275.jpeg?auto=compress&cs=tinysrgb&w=800", // placeholder — replace with CJ
   ],
 } as const;
 
