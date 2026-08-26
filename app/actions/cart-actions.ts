@@ -34,41 +34,46 @@ async function saveVisitorTokens(tokens: Tokens) {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+    maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
   });
 }
 
-// Build a Wix client. If we have stored tokens, use them.
-// If not, generate fresh visitor tokens so the same identity
-// is used for both the addToCart call AND the /cart page.
-async function getCartClient(): Promise<{ client: ReturnType<typeof createClient>; freshTokens: boolean }> {
+// Build a Wix client with valid tokens.
+// If stored tokens exist, reuse them so the cart page sees the same identity.
+// If not, generate fresh visitor tokens first and persist them — this is what
+// ties the add-to-cart call to the same session the /cart page will read.
+async function getCartClient(): Promise<ReturnType<typeof createClient>> {
   const stored = await readStoredTokens();
 
-  const client = createClient({
-    modules: { products, currentCart },
-    auth: OAuthStrategy({ clientId: WIX_CLIENT_ID, tokens: stored }),
-  });
-
   if (stored) {
-    return { client, freshTokens: false };
+    return createClient({
+      modules: { products, currentCart },
+      auth: OAuthStrategy({ clientId: WIX_CLIENT_ID, tokens: stored }),
+    });
   }
 
-  // No stored tokens → generate visitor tokens NOW so the cart page
-  // can look up the same cart by reading the same cookie
+  // No stored tokens — generate visitor tokens before calling addToCurrentCart.
+  // These tokens are saved to the wix_visitor cookie here, in the server action
+  // response, so the browser sends them on the very next request to /cart.
+  const bootstrapClient = createClient({
+    modules: { products, currentCart },
+    auth: OAuthStrategy({ clientId: WIX_CLIENT_ID }),
+  });
+
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const visitorTokens = await (client.auth as any).generateVisitorTokens();
+    const visitorTokens = await (bootstrapClient.auth as any).generateVisitorTokens();
     await saveVisitorTokens(visitorTokens);
-    // Recreate client with the real tokens
-    const clientWithTokens = createClient({
+    return createClient({
       modules: { products, currentCart },
       auth: OAuthStrategy({ clientId: WIX_CLIENT_ID, tokens: visitorTokens }),
     });
-    return { client: clientWithTokens, freshTokens: true };
   } catch (e) {
     console.error("[cartClient] generateVisitorTokens failed:", e);
-    return { client, freshTokens: false };
+    // Fall back to the token-less client; addToCurrentCart will still work
+    // but the resulting cart may not persist across the navigation.
+    return bootstrapClient;
   }
 }
 
@@ -78,7 +83,7 @@ export async function serverAddToCart(
   quantity: number
 ): Promise<{ ok: boolean; itemCount: number; error?: string }> {
   try {
-    const { client } = await getCartClient();
+    const client = await getCartClient();
 
     const response = await client.currentCart.addToCurrentCart({
       lineItems: [
@@ -93,14 +98,16 @@ export async function serverAddToCart(
       ],
     });
 
-    // After the API call, the client's in-memory tokens are populated.
-    // Save them — this is what makes /cart find the same cart.
+    // After a successful addToCurrentCart, persist the current tokens so the
+    // SDK's internal token refresh (if it happened during the call) is captured.
+    // This ensures /cart always reads fresh, valid credentials.
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const liveTokens = (client.auth as any).getTokens();
+      const liveTokens = (client.auth as any).getTokens() as Tokens;
       await saveVisitorTokens(liveTokens);
     } catch (e) {
-      console.error("[serverAddToCart] saveVisitorTokens after call:", e);
+      // Non-fatal: tokens were already saved before the API call in getCartClient().
+      console.error("[serverAddToCart] post-call saveVisitorTokens:", e);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

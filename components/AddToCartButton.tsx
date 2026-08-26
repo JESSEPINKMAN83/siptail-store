@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { serverAddToCart } from "@/app/actions/cart-actions";
-import { useRouter } from "next/navigation";
 
 declare global { var fbq: ((...args: unknown[]) => void) | undefined; }
 
@@ -13,7 +12,6 @@ export default function AddToCartButton({ productId, productName, variants }: Pr
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
   const sel = variants.find(v => v.id === selected) ?? variants[0];
   const priceNum = sel?.price ? parseFloat(sel.price.replace(/[^0-9.]/g, "")) || 0 : 0;
 
@@ -37,10 +35,15 @@ export default function AddToCartButton({ productId, productName, variants }: Pr
         });
       }
       setAdded(true);
-      setTimeout(() => setAdded(false), 2500);
-      router.refresh();
-      // Navigate to cart after success
-      router.push("/cart");
+
+      // Use a full-page navigation instead of router.push().
+      // The server action sets the wix_visitor cookie in its response headers.
+      // router.push() triggers a client-side RSC navigation that may fire
+      // before the browser has applied those Set-Cookie headers, so the cart
+      // page server render never sees the cookie and returns an empty cart.
+      // window.location.href guarantees the browser sends the freshly-set
+      // cookie in the next request to /cart.
+      window.location.href = "/cart";
     } catch (e) {
       console.error("[AddToCart] unexpected:", e);
       setError("Could not add to cart. Please try again.");
