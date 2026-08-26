@@ -4,18 +4,52 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@/lib/translations";
 import { t } from "@/lib/translations";
+import { ilsFromUsd } from "@/lib/config";
 
 declare global { var fbq: ((...args: unknown[]) => void) | undefined; }
 
+// Wix cart API returns image as a wix:image:// URI — transform to HTTPS for <img>.
+// Format: wix:image://v1/<fileId>/<filename>#originWidth=W&originHeight=H
+// Public Wix CDN URL: https://static.wixstatic.com/media/<fileId>
+function wixImageToUrl(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  if (raw.startsWith("http")) return raw; // already a plain URL
+  const match = raw.match(/wix:image:\/\/v1\/([^/]+)\//);
+  if (match) return `https://static.wixstatic.com/media/${match[1]}`;
+  return null;
+}
+
 interface LineItem {
-  _id?: string | null; quantity?: number | null;
+  _id?: string | null;
+  quantity?: number | null;
   productName?: { original?: string | null } | null;
+  // price.amount is a numeric string e.g. "35.00"; price.formattedAmount is "£35.00"
   price?: { formattedAmount?: string | null; amount?: string | null } | null;
+  // image is a wix:image:// URI string
   image?: string | null;
 }
+
 interface CartData {
   lineItems?: LineItem[] | null;
-  subtotal?: { formattedAmount?: string | null; amount?: string | null } | null;
+  // getCurrentCart() does NOT return priceSummary — totals must be computed
+  // from lineItems[].price.amount * quantity
+  priceSummary?: { subtotal?: { formattedAmount?: string | null; amount?: string | null } | null } | null;
+  currency?: string | null;
+}
+
+function computeSubtotal(items: LineItem[], isHe: boolean): string {
+  const total = items.reduce((sum, item) => {
+    const amt = parseFloat(item.price?.amount ?? "0") || 0;
+    const qty = item.quantity ?? 1;
+    return sum + amt * qty;
+  }, 0);
+  if (total === 0) return "—";
+  if (isHe) {
+    // Convert USD→ILS using the same helper used site-wide
+    const ils = ilsFromUsd(`$${total.toFixed(2)}`);
+    return ils;
+  }
+  return `$${total.toFixed(2)}`;
 }
 
 export default function CartContents({
@@ -48,14 +82,17 @@ export default function CartContents({
 
   function handleCheckout() {
     if (typeof window !== "undefined" && window.fbq) {
-      const sub = parseFloat(cart?.subtotal?.amount ?? "0") || 0;
-      window.fbq("track", "InitiateCheckout", { value: sub, currency: isHe ? "ILS" : "USD", num_items: cart?.lineItems?.reduce((a, i) => a + (i.quantity ?? 0), 0) ?? 0 });
+      const items = cart?.lineItems ?? [];
+      const sub = items.reduce((s, i) => s + (parseFloat(i.price?.amount ?? "0") || 0) * (i.quantity ?? 1), 0);
+      window.fbq("track", "InitiateCheckout", {
+        value: sub,
+        currency: isHe ? "ILS" : "USD",
+        num_items: items.reduce((a, i) => a + (i.quantity ?? 0), 0),
+      });
     }
     setCheckingOut(true);
     router.push("/checkout");
   }
-
-  // Preview mode removed — cart always shows real state
 
   const items = cart?.lineItems ?? [];
 
@@ -67,25 +104,36 @@ export default function CartContents({
     </div>
   );
 
+  const subtotalDisplay = computeSubtotal(items, isHe);
+
   return (
     <div dir={isHe ? "rtl" : "ltr"}>
       <div className="space-y-3 mb-8">
         {items.map(item => {
           const id = item._id ?? "u";
+          const imgUrl = wixImageToUrl(item.image);
+          // Per-item price display: use formattedAmount when currency matches,
+          // otherwise convert to ILS for Hebrew mode
+          const rawAmt = parseFloat(item.price?.amount ?? "0") || 0;
+          const itemPriceDisplay = isHe
+            ? ilsFromUsd(`$${rawAmt.toFixed(2)}`)
+            : (item.price?.formattedAmount ?? `$${rawAmt.toFixed(2)}`);
+
           return (
             <div key={id} className="flex gap-4 p-4 border" style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}>
-              {/* Image — in RTL sits on the right due to dir=rtl */}
-              <div className="w-20 h-20 flex items-center justify-center flex-shrink-0" style={{ background: "#F5F4F0" }}>
-                {item.image
-                  ? <img src={item.image} alt={item.productName?.original ?? ""} className="w-full h-full object-cover" />
-                  : <span className="text-xs uppercase tracking-wide" style={{ color: "#6B7280" }}>Trail Bottle</span>}
+              {/* Thumbnail — wix:image:// URI converted to HTTPS */}
+              <div className="w-20 h-20 flex items-center justify-center flex-shrink-0 overflow-hidden" style={{ background: "#F5F4F0" }}>
+                {imgUrl
+                  ? <img src={imgUrl} alt={item.productName?.original ?? ""} className="w-full h-full object-cover" />
+                  : <span className="text-xs uppercase tracking-wide text-center px-1" style={{ color: "#6B7280" }}>
+                      {item.productName?.original ?? "Product"}
+                    </span>}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm mb-1 truncate" style={{ fontFamily: isHe ? "Noto Serif Hebrew, Georgia, serif" : "Georgia, serif", color: "#1A1A1A" }}>
                   {item.productName?.original}
                 </h3>
-                <p className="font-bold text-sm mb-2" style={{ color: "#1B4332" }}>{item.price?.formattedAmount}</p>
-                {/* Qty controls — flex row, dir=rtl flips naturally */}
+                <p className="font-bold text-sm mb-2" style={{ color: "#1B4332" }}>{itemPriceDisplay}</p>
                 <div className="flex items-center gap-2">
                   <button onClick={() => updateQty(id, (item.quantity ?? 1) - 1)} disabled={loading}
                     className="w-8 h-8 border flex items-center justify-center text-sm font-medium hover:bg-gray-50 disabled:opacity-50 touch-manipulation"
@@ -110,7 +158,7 @@ export default function CartContents({
         <div className="flex justify-between items-center mb-2">
           <span className="font-medium text-sm" style={{ color: "#1A1A1A" }}>{t(locale, "subtotal")}</span>
           <span className="text-xl font-bold" style={{ fontFamily: "Georgia, serif", color: "#1A1A1A" }}>
-            {cart?.subtotal?.formattedAmount ?? "—"}
+            {subtotalDisplay}
           </span>
         </div>
         <p className="text-xs mb-6" style={{ color: "#6B7280" }}>{t(locale, "taxes_note")}</p>

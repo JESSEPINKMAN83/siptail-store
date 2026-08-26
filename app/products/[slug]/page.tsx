@@ -1,48 +1,101 @@
 export const dynamic = "force-dynamic";
-import { getWixServerClient } from "@/lib/wix-client";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/translations";
-import { WE_CONFIG, getWhatsAppUrl } from "@/lib/config";
+import { getWhatsAppUrl } from "@/lib/config";
 import { PRODUCTS, getProductBySlug, formatIls } from "@/lib/products";
 import ProductPageClient from "@/components/ProductPageClient";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-const PHOTOS = WE_CONFIG.PRODUCT_IMAGES;
+const WIX_SITE_ID = process.env.NEXT_PUBLIC_WIX_SITE_ID || "c9466f44-badc-4481-af3e-2b00fa6472c8";
+const WIX_CLIENT_ID = process.env.NEXT_PUBLIC_WIX_CLIENT_ID || "1d47ce62-8390-4782-86d3-c706cde04ec3";
+
+// Shape returned by the Wix Stores v3 REST GET product endpoint
+// with ?fields=MEDIA_ITEMS_INFO (required to populate itemsInfo.items)
+type WixRestProduct = {
+  id?: string | null;
+  slug?: string | null;
+  name?: string | null;
+  description?: string | null;
+  revision?: string | null;
+  media?: {
+    main?: {
+      image?: { url?: string | null } | null;
+      mediaType?: string | null;
+    } | null;
+    itemsInfo?: {
+      items?: Array<{
+        image?: { url?: string | null } | null;
+        mediaType?: string | null;
+      }> | null;
+    } | null;
+  } | null;
+  priceData?: {
+    price?: number | null;
+    currency?: string | null;
+  } | null;
+  variants?: Array<{
+    id?: string | null;
+    choices?: Record<string, string> | null;
+    variant?: { priceData?: { price?: number | null } | null } | null;
+  }> | null;
+};
+
+// Fetch a product using the Wix REST API with MEDIA_ITEMS_INFO so all images come back.
+// The Wix SDK's queryProducts() never returns media.itemsInfo — only the REST endpoint does.
+async function fetchProductRest(wixId: string): Promise<WixRestProduct | null> {
+  try {
+    // Get an anonymous visitor token from the Wix OAuth endpoint
+    const tokenRes = await fetch(
+      `https://www.wixapis.com/oauth2/token`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: WIX_CLIENT_ID,
+          grantType: "anonymous",
+        }),
+        next: { revalidate: 0 },
+      }
+    );
+    const tokenData = await tokenRes.json().catch(() => ({}));
+    const accessToken: string | undefined = tokenData?.access_token;
+
+    if (!accessToken) {
+      console.error("[fetchProductRest] could not get visitor token:", tokenData);
+      return null;
+    }
+
+    const res = await fetch(
+      `https://www.wixapis.com/stores/v3/products/${wixId}?fields=MEDIA_ITEMS_INFO`,
+      {
+        headers: {
+          Authorization: accessToken,
+          "wix-site-id": WIX_SITE_ID,
+        },
+        next: { revalidate: 0 },
+      }
+    );
+
+    if (!res.ok) {
+      console.error("[fetchProductRest] HTTP", res.status, await res.text().catch(() => ""));
+      return null;
+    }
+
+    const data = await res.json();
+    return (data?.product ?? null) as WixRestProduct | null;
+  } catch (e) {
+    console.error("[fetchProductRest] error:", e);
+    return null;
+  }
+}
 
 type AnyVariant = {
   _id?: string | null; id?: string | null;
   choices?: Record<string, string> | null;
   variant?: { priceData?: { formatted?: { price?: string | null } | null } | null } | null;
   price?: { actualPrice?: { amount?: string | null } | null } | null;
-  sku?: string | null;
 };
-type AnyProduct = {
-  _id?: string | null; id?: string | null; name?: string | null; slug?: string | null;
-  description?: string | null; plainDescription?: string | null;
-  priceData?: { formatted?: { price?: string | null } | null } | null;
-  actualPriceRange?: { minValue?: string | null } | null;
-  variants?: AnyVariant[] | null;
-  variantsInfo?: { variants?: AnyVariant[] | null } | null;
-  media?: {
-    mainMedia?: { image?: { url?: string | null } | null } | null;
-    items?: { image?: { url?: string | null } | null }[] | null;
-  } | null;
-};
-
-async function fetchProduct(wixId: string, slug: string): Promise<AnyProduct | null> {
-  try {
-    const c = await getWixServerClient();
-    // Try querying by slug first (most reliable)
-    const r = await c.products.queryProducts().eq("slug", slug).find();
-    if (r.items.length > 0) return r.items[0] as AnyProduct;
-    // Fallback: query by id
-    const r2 = await c.products.queryProducts().eq("_id", wixId).find();
-    return (r2.items[0] as AnyProduct) ?? null;
-  } catch {
-    return null;
-  }
-}
 
 function getVariantId(v: AnyVariant): string {
   return (v.id ?? v._id ?? "").toString();
@@ -63,41 +116,34 @@ export default async function ProductDetailPage({
   const locale = await getLocale();
   const isHe = locale === "he";
 
-  // Look up in our static catalog — 404 if slug is unknown
+  // 404 for unknown slugs
   const catalogEntry = getProductBySlug(slug);
   if (!catalogEntry) {
     notFound();
   }
 
-  // Hebrew name from translations
   const hebrewName = t("he", `product.${slug}.name` as any) || slug;
   const englishName = t("en", `product.${slug}.name` as any) || slug;
   const displayName = isHe ? hebrewName : englishName;
 
-  // Fetch live Wix product for image and description
-  const wixProduct = await fetchProduct(catalogEntry.wixId, slug);
+  // REST fetch with MEDIA_ITEMS_INFO — gets all images, not just the first
+  const wixProduct = await fetchProductRest(catalogEntry.wixId);
 
-  // Build image array — real Wix images first, then brand fallbacks
+  // Build image array from all itemsInfo.items, then main as fallback
   const images: string[] = [];
-  if (wixProduct?.media?.mainMedia?.image?.url) {
-    images.push(wixProduct.media.mainMedia.image.url);
+  const allItems = wixProduct?.media?.itemsInfo?.items ?? [];
+  for (const item of allItems) {
+    const url = item?.image?.url;
+    if (url && !images.includes(url)) images.push(url);
   }
-  if (wixProduct?.media?.items) {
-    for (const item of wixProduct.media.items) {
-      if (item.image?.url && !images.includes(item.image.url)) {
-        images.push(item.image.url);
-      }
-    }
+  // If itemsInfo was empty, fall back to media.main
+  if (images.length === 0 && wixProduct?.media?.main?.image?.url) {
+    images.push(wixProduct.media.main.image.url);
   }
 
+  // Variants from Wix (if any)
+  const rawVariants: AnyVariant[] = (wixProduct?.variants as AnyVariant[]) ?? [];
 
-  // Variants from Wix (if any), otherwise no variants
-  const rawVariants: AnyVariant[] =
-    (wixProduct as any)?.variantsInfo?.variants ??
-    (wixProduct as any)?.variants ??
-    [];
-
-  // Price display — always use catalog ILS price as the authoritative price
   const ilsPrice = formatIls(catalogEntry.ils);
   const basePrice = isHe
     ? ilsPrice
@@ -111,11 +157,11 @@ export default async function ProductDetailPage({
   }));
 
   const description =
-    (wixProduct as any)?.plainDescription ??
     (wixProduct as any)?.description ??
+    (wixProduct as any)?.plainDescription ??
     "";
 
-  const productId = wixProduct?._id ?? wixProduct?.id ?? catalogEntry.wixId;
+  const productId = wixProduct?.id ?? catalogEntry.wixId;
 
   return (
     <div style={{ background: "#F5F4F0" }} dir={isHe ? "rtl" : "ltr"}>
@@ -126,19 +172,11 @@ export default async function ProductDetailPage({
           style={{ justifyContent: isHe ? "flex-end" : "flex-start" }}
           aria-label="breadcrumb"
         >
-          <Link
-            href={`/?lang=${locale}`}
-            className="hover:text-[#1B4332] transition-colors"
-            style={{ color: "#6B7280" }}
-          >
+          <Link href={`/?lang=${locale}`} className="hover:text-[#1B4332] transition-colors" style={{ color: "#6B7280" }}>
             {isHe ? "בית" : "Home"}
           </Link>
           <span style={{ color: "#D4E6D4" }}>{isHe ? "‹" : "›"}</span>
-          <Link
-            href={`/products?lang=${locale}`}
-            className="hover:text-[#1B4332] transition-colors"
-            style={{ color: "#6B7280" }}
-          >
+          <Link href={`/products?lang=${locale}`} className="hover:text-[#1B4332] transition-colors" style={{ color: "#6B7280" }}>
             {isHe ? "חנות" : "Shop"}
           </Link>
           <span style={{ color: "#D4E6D4" }}>{isHe ? "‹" : "›"}</span>
@@ -146,24 +184,17 @@ export default async function ProductDetailPage({
         </nav>
       </div>
 
-      {/* Shipping contract — above the fold */}
+      {/* Shipping contract */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-0">
         <div
           className="flex flex-wrap gap-4 text-xs py-3 border-b"
-          style={{
-            borderColor: "#D4E6D4",
-            color: "#4A7C59",
-            flexDirection: isHe ? "row-reverse" : "row",
-          }}
+          style={{ borderColor: "#D4E6D4", color: "#4A7C59", flexDirection: isHe ? "row-reverse" : "row" }}
         >
           <span>
             <strong style={{ color: "#1B4332" }}>{t(locale, "shipping.homeDelivery")}</strong>
-            {" · "}
-            {t(locale, "shipping.businessDays")}
-            {" · "}
-            {t(locale, "shipping.belowThreshold")}
-            {" · "}
-            {t(locale, "shipping.aboveThreshold")}
+            {" · "}{t(locale, "shipping.businessDays")}
+            {" · "}{t(locale, "shipping.belowThreshold")}
+            {" · "}{t(locale, "shipping.aboveThreshold")}
           </span>
           <span style={{ color: "#6B7280" }}>{t(locale, "shipping.leadTime")}</span>
         </div>
