@@ -82,6 +82,9 @@ export const translations = {
     "product.trailrest-blanket.name": "TrailRest Waterproof Blanket",
     "product.trailguard-repellent-bands.name": "TrailGuard Repellent Bands (2-pack)",
     "product.trailcharge-solar-bank.name": "TrailCharge Solar Power Bank",
+    // TrailDuo Double Dog Leash
+    "product.trailduo-double-dog-leash.name": "TrailDuo Double Dog Leash",
+    "product.trailduo-double-dog-leash.description": "Walk two dogs at once without the tangle. The TrailDuo Double Dog Leash splits into two equal-length leads from a single swivel connector, keeping both dogs on separate lines while you hold one handle. Made from durable nylon webbing with a comfortable grip. Available in S, M, and L to match your dogs' size. Colours: Black, Blue, Red, Purple.",
     // Category labels
     "category.all": "All",
     "category.dog-gear": "Dog Gear",
@@ -172,6 +175,9 @@ export const translations = {
     "product.trailrest-blanket.name": "שמיכת פיקניק עמידה TrailRest",
     "product.trailguard-repellent-bands.name": "צמידי הדחת חרקים TrailGuard (2 יח׳)",
     "product.trailcharge-solar-bank.name": "סוללת שמש ניידת TrailCharge",
+    // TrailDuo Double Dog Leash
+    "product.trailduo-double-dog-leash.name": "רצועה כפולה לשני כלבים TrailDuo",
+    "product.trailduo-double-dog-leash.description": "רצועה כפולה המאפשרת הליכה עם שני כלבים בו-זמנית. מתאימה לכלבים בגדלים שונים. נגד סבכים, חזקה ונוחה לאחיזה.",
     // Category labels
     "category.all": "הכל",
     "category.dog-gear": "ציוד לכלב",
