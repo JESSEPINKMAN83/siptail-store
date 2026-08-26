@@ -106,27 +106,47 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="flex justify-center mb-10"><LogoVertical variant="white" /></div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-              {[
-                { title: isHe ? "אודות" : "About", links: [
-                  { label: isHe ? "הסיפור שלנו" : "Our Story", href: "/about" },
-                  { label: isHe ? "קיימות" : "Sustainability", href: "/sustainability" },
+              {(isHe ? [
+                { title: "נגישות", links: [
+                  { label: t(locale, "a11y.statement"), href: "/accessibility" },
+                  { label: "מדיניות פרטיות", href: "/privacy" },
+                  { label: "תנאי שימוש", href: "/terms" },
                 ]},
-                { title: isHe ? "חנות" : "Shop", links: [
-                  { label: isHe ? "כל המוצרים" : "All Products", href: "/products" },
-                  { label: isHe ? "חדש" : "New Arrivals", href: "/products?cat=new" },
-                  { label: isHe ? "מבצעים" : "Sale", href: "/products?cat=sale" },
-                ]},
-                { title: isHe ? "תמיכה" : "Support", links: [
+                { title: "תמיכה", links: [
                   { label: t(locale, "contact_us"), href: "/contact" },
                   { label: t(locale, "shipping_policy"), href: "/contact" },
-                  { label: isHe ? "החשבון שלי" : "My Account", href: "/login" },
+                  { label: "החשבון שלי", href: "/login" },
                 ]},
-                { title: isHe ? "נגישות" : "Legal", links: [
+                { title: "חנות", links: [
+                  { label: "כל המוצרים", href: "/products" },
+                  { label: "חדש", href: "/products?cat=new" },
+                  { label: "מבצעים", href: "/products?cat=sale" },
+                ]},
+                { title: "אודות", links: [
+                  { label: "הסיפור שלנו", href: "/about" },
+                  { label: "קיימות", href: "/sustainability" },
+                ]},
+              ] : [
+                { title: "About", links: [
+                  { label: "Our Story", href: "/about" },
+                  { label: "Sustainability", href: "/sustainability" },
+                ]},
+                { title: "Shop", links: [
+                  { label: "All Products", href: "/products" },
+                  { label: "New Arrivals", href: "/products?cat=new" },
+                  { label: "Sale", href: "/products?cat=sale" },
+                ]},
+                { title: "Support", links: [
+                  { label: t(locale, "contact_us"), href: "/contact" },
+                  { label: t(locale, "shipping_policy"), href: "/contact" },
+                  { label: "My Account", href: "/login" },
+                ]},
+                { title: "Legal", links: [
                   { label: t(locale, "a11y.statement"), href: "/accessibility" },
-                  { label: isHe ? "מדיניות פרטיות" : "Privacy Policy", href: "/privacy" },
-                  { label: isHe ? "תנאי שימוש" : "Terms of Use", href: "/terms" },
+                  { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Terms of Use", href: "/terms" },
                 ]},
-              ].map(col => (
+              ]).map(col => (
                 <div key={col.title} className={isHe ? "text-right" : ""}>
                   <h3 className="font-bold text-xs uppercase tracking-widest mb-4" style={{ color: "#D4E6D4" }}>{col.title}</h3>
                   <ul className="space-y-2">

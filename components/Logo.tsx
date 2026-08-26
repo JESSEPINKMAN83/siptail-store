@@ -33,7 +33,9 @@ export function LogoHorizontal({ variant = "dark", className = "" }: { variant?:
   const textColor = variant === "white" ? "#FFFFFF" : "#1A1A1A";
   const iconColor = variant === "white" ? "#FFFFFF" : "#1B4332";
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
+    // rtl:flex-row-reverse: in Hebrew, icon moves to the right of the text block
+    // so the logo reads [WALK ESSENTIALS text] [mountain icon] when dir=rtl
+    <div className={`flex items-center gap-2.5 rtl:flex-row-reverse ${className}`}>
       <MountainIcon color={iconColor} width={36} height={24} />
       <div className="flex flex-col justify-center" style={{ lineHeight: 1 }}>
         <span style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700, fontSize: "1.25rem", letterSpacing: "0.02em", color: textColor, display: "block" }}>WALK</span>
