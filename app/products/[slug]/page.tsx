@@ -11,7 +11,10 @@ const WIX_SITE_ID = process.env.NEXT_PUBLIC_WIX_SITE_ID || "c9466f44-badc-4481-a
 const WIX_CLIENT_ID = process.env.NEXT_PUBLIC_WIX_CLIENT_ID || "1d47ce62-8390-4782-86d3-c706cde04ec3";
 
 // Shape returned by the Wix Stores v3 REST GET product endpoint
-// with ?fields=MEDIA_ITEMS_INFO (required to populate itemsInfo.items)
+// Wix Stores v3 REST GET product response shape.
+// ?fields=MEDIA_ITEMS_INFO populates itemsInfo.items (all images, each with .url directly).
+// The `options` array maps choiceId → human-readable name (e.g. "Black", "S").
+// Variants live at variantsInfo.variants[], NOT product.variants (absent in v3).
 type WixRestProduct = {
   id?: string | null;
   slug?: string | null;
@@ -19,31 +22,29 @@ type WixRestProduct = {
   description?: string | null;
   revision?: string | null;
   media?: {
-    main?: {
-      image?: { url?: string | null } | null;
-      mediaType?: string | null;
-    } | null;
+    // media.main.url is the direct CDN URL (not nested under .image in v3)
+    main?: { url?: string | null; mediaType?: string | null } | null;
     itemsInfo?: {
-      items?: Array<{
-        image?: { url?: string | null } | null;
-        mediaType?: string | null;
-      }> | null;
+      // items[].url is the direct CDN URL (not nested under .image in v3)
+      items?: Array<{ url?: string | null; mediaType?: string | null }> | null;
     } | null;
   } | null;
-  priceData?: {
-    price?: number | null;
-    currency?: string | null;
-  } | null;
-  variants?: Array<{
+  priceData?: { price?: number | null; currency?: string | null } | null;
+  // options[]: each option has a name (e.g. "Color") and choices with choiceId+name pairs
+  options?: Array<{
     id?: string | null;
-    choices?: Record<string, string> | null;
-    variant?: { priceData?: { price?: number | null } | null } | null;
+    name?: string | null;
+    choicesSettings?: {
+      choices?: Array<{ choiceId?: string; name?: string }> | null;
+    } | null;
   }> | null;
-  // v3 REST API puts variants here, not at product.variants
+  // v3 REST: variants live here (product.variants is absent)
   variantsInfo?: {
     variants?: Array<{
       id?: string | null;
-      choices?: Array<{ optionChoiceIds?: { optionId?: string; choiceId?: string } }> | null;
+      choices?: Array<{
+        optionChoiceIds?: { optionId?: string; choiceId?: string };
+      }> | null;
       price?: { actualPrice?: { amount?: string | null } | null } | null;
       inventoryStatus?: { inStock?: boolean | null } | null;
     }> | null;
@@ -101,7 +102,8 @@ async function fetchProductRest(wixId: string): Promise<WixRestProduct | null> {
 
 type AnyVariant = {
   _id?: string | null; id?: string | null;
-  choices?: Record<string, string> | null;
+  // v3 REST: choices is an array of {optionChoiceIds} objects, not a Record
+  choices?: Array<{ optionChoiceIds?: { optionId?: string; choiceId?: string } }> | null;
   variant?: { priceData?: { formatted?: { price?: string | null } | null } | null } | null;
   price?: { actualPrice?: { amount?: string | null } | null } | null;
 };
@@ -115,6 +117,21 @@ function getVariantPrice(v: AnyVariant): string {
     ?? v.variant?.priceData?.formatted?.price
     ?? "";
 }
+
+// Convert wix:image://v1/<fileId>/filename.jpg#originWidth=W&originHeight=H
+// → https://static.wixstatic.com/media/<fileId>/v1/fit/w_800,h_800,q_85/filename.jpg
+// Also handles already-HTTPS URLs (pass-through).
+function toWixStaticUrl(raw: string | null | undefined, w = 800, h = 800): string | null {
+  if (!raw) return null;
+  if (raw.startsWith("https://") || raw.startsWith("http://")) return raw;
+  // wix:image://v1/<fileId>/<filename>#originWidth=W&originHeight=H
+  const m = raw.match(/^wix:image:\/\/v1\/([^/]+)\/([^#?]+)/);
+  if (!m) return raw; // unknown format, pass through
+  const [, fileId, filename] = m;
+  return `https://static.wixstatic.com/media/${fileId}/v1/fit/w_${w},h_${h},q_85/${filename}`;
+}
+
+
 
 export default async function ProductDetailPage({
   params,
@@ -138,25 +155,30 @@ export default async function ProductDetailPage({
   // REST fetch with MEDIA_ITEMS_INFO — gets all images, not just the first
   const wixProduct = await fetchProductRest(catalogEntry.wixId);
 
-  // Build image array from all itemsInfo.items, then main as fallback
+  // Build image array from all itemsInfo.items, then main as fallback.
+  // Wix v3 REST: items[].url is the direct CJ/CDN URL (HTTPS already).
+  // toWixStaticUrl() handles wix:image:// URIs too (pass-through for HTTPS).
   const images: string[] = [];
   const allItems = wixProduct?.media?.itemsInfo?.items ?? [];
   for (const item of allItems) {
-    const url = item?.image?.url;
-    if (url && !images.includes(url)) images.push(url);
+    const converted = toWixStaticUrl(item?.url);
+    if (converted && !images.includes(converted)) images.push(converted);
   }
   // If itemsInfo was empty, fall back to media.main
-  if (images.length === 0 && wixProduct?.media?.main?.image?.url) {
-    images.push(wixProduct.media.main.image.url);
+  if (images.length === 0) {
+    const mainConverted = toWixStaticUrl(wixProduct?.media?.main?.url);
+    if (mainConverted) images.push(mainConverted);
+  }
+  // Last fallback: heroImage from the static catalog
+  if (images.length === 0 && catalogEntry.heroImage) {
+    images.push(catalogEntry.heroImage);
   }
 
   // Variants from Wix (if any)
   // The Wix Stores v3 REST API returns variants at variantsInfo.variants[],
   // not at product.variants (which is absent from v3 responses).
   const rawVariants: AnyVariant[] = (
-    (wixProduct?.variantsInfo?.variants as AnyVariant[]) ??
-    (wixProduct?.variants as AnyVariant[]) ??
-    []
+    (wixProduct?.variantsInfo?.variants as AnyVariant[]) ?? []
   );
 
   const ilsPrice = formatIls(catalogEntry.ils);
@@ -164,17 +186,52 @@ export default async function ProductDetailPage({
     ? ilsPrice
     : `$${(catalogEntry.ils / 3.7).toFixed(2)}`;
 
-  const displayVariants = rawVariants.map((v) => ({
-    id: getVariantId(v),
-    label: Object.values(v.choices ?? {}).join(" / "),
-    price: basePrice,
-    rawPrice: getVariantPrice(v),
-  }));
+  // Build a choiceId → display name map from the product's options array.
+  // Wix v3 REST: variant.choices[].optionChoiceIds.choiceId references
+  // product.options[].choicesSettings.choices[].choiceId, which holds the English name.
+  // Then map English names → Hebrew translations for the he locale.
+  const heColorMap: Record<string, string> = {
+    Black: "שחור", Blue: "כחול", Red: "אדום", Purple: "סגול",
+    Green: "ירוק", White: "לבן", Yellow: "צהוב", Orange: "כתום",
+  };
+  const heSizeMap: Record<string, string> = {
+    S: "S", M: "M", L: "L", XL: "XL",
+    Small: "קטן", Medium: "בינוני", Large: "גדול",
+  };
+  function hebrewifyChoiceName(name: string): string {
+    return heColorMap[name] ?? heSizeMap[name] ?? name;
+  }
 
+  const choiceIdToName: Record<string, string> = {};
+  for (const opt of (wixProduct?.options ?? [])) {
+    for (const ch of (opt.choicesSettings?.choices ?? [])) {
+      if (ch.choiceId && ch.name) choiceIdToName[ch.choiceId] = ch.name;
+    }
+  }
+
+  const displayVariants = rawVariants.map((v) => {
+    const choiceNames = (v.choices ?? []).map((c) => {
+      const choiceId = c.optionChoiceIds?.choiceId ?? "";
+      const englishName = choiceIdToName[choiceId] ?? choiceId;
+      return isHe ? hebrewifyChoiceName(englishName) : englishName;
+    });
+    return {
+      id: getVariantId(v),
+      label: choiceNames.join(" / ") || (isHe ? "ברירת מחדל" : "Default"),
+      price: basePrice,
+      rawPrice: getVariantPrice(v),
+    };
+  });
+
+  // Use translated description from translations.ts (Hebrew or English).
+  // The Wix API description field is often empty or raw HTML for headless products;
+  // translations.ts has the full, formatted product copy.
+  const translationDescKey = `product.${slug}.description` as any;
+  const descriptionFromTranslations = t(locale, translationDescKey);
   const description =
-    (wixProduct as any)?.description ??
-    (wixProduct as any)?.plainDescription ??
-    "";
+    (descriptionFromTranslations && descriptionFromTranslations !== translationDescKey)
+      ? descriptionFromTranslations
+      : ((wixProduct as any)?.description ?? (wixProduct as any)?.plainDescription ?? "");
 
   const productId = wixProduct?.id ?? catalogEntry.wixId;
 

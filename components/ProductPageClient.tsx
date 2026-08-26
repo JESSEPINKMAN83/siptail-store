@@ -59,6 +59,44 @@ function TrustStrip({ isHe, locale }: { isHe: boolean; locale: Locale }) {
   );
 }
 
+// WE-fix: Feature bullets section — shown above Add to Cart
+// Reads bullets from translations using product slug
+function FeatureBullets({ slug, locale, isHe }: { slug: string; locale: Locale; isHe: boolean }) {
+  const bullets: string[] = [];
+  for (let i = 1; i <= 6; i++) {
+    const key = `product.${slug}.bullet${i}` as any;
+    const val = t(locale, key);
+    // Only include if the key resolved (not returned as the key itself)
+    if (val && val !== key) bullets.push(val);
+  }
+  const expertTipKey = `product.${slug}.expert-tip` as any;
+  const expertTip = t(locale, expertTipKey);
+  const hasExpertTip = expertTip && expertTip !== expertTipKey;
+
+  if (bullets.length === 0 && !hasExpertTip) return null;
+
+  return (
+    <div className={`mb-4 ${isHe ? "text-right" : ""}`}>
+      {bullets.length > 0 && (
+        <ul className={`space-y-1.5 mb-3 ${isHe ? "pr-0" : ""}`}>
+          {bullets.map((b, i) => (
+            <li key={i} className={`flex items-start gap-2 text-sm ${isHe ? "flex-row-reverse" : ""}`} style={{ color: "#1A1A1A" }}>
+              <span className="mt-0.5 text-xs font-bold flex-shrink-0" style={{ color: "#1B4332" }}>✓</span>
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {hasExpertTip && (
+        <div className="p-3 text-xs leading-relaxed" style={{ background: "#D4E6D4", color: "#1A1A1A", borderLeft: isHe ? "none" : "3px solid #1B4332", borderRight: isHe ? "3px solid #1B4332" : "none" }}>
+          <strong style={{ color: "#1B4332" }}>{isHe ? "טיפ מהמומחים:" : "Expert tip:"}</strong>{" "}
+          {expertTip}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProductPageClient({ product, locale = "en", waUrl, related }: { product: Product; locale?: Locale; waUrl?: string; related: Related[] }) {
   const [selectedVariant, setSelectedVariant] = useState(product.variants[0]?.id ?? "");
   const [qty, setQty] = useState(1);
@@ -151,13 +189,20 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
     </div>
   );
 
-  // WE-17: Tab content
-  const descContent = (
-    <div className={isHe ? "text-right" : ""}>
-      {product.description.split("\n").map((line, i) => (
-        <p key={i} className={line === "" ? "mt-3" : ""}>{line}</p>
+  // WE-17: Tab content — description
+  // The description comes from translations.ts as plain text with \n line breaks.
+  // Render paragraph blocks, skipping empty lines (they become spacing).
+  const descParagraphs = product.description
+    ? product.description.split("\n").filter(Boolean)
+    : [];
+  const descContent = product.description ? (
+    <div className={`space-y-3 ${isHe ? "text-right" : ""}`}>
+      {descParagraphs.map((para, i) => (
+        <p key={i} className="leading-relaxed">{para}</p>
       ))}
     </div>
+  ) : (
+    <p style={{ color: "#6B7280" }}>{isHe ? "תיאור בקרוב." : "Description coming soon."}</p>
   );
   const specsContent = (
     <div className={`space-y-2 ${isHe ? "text-right" : ""}`}>
@@ -251,6 +296,8 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
           </div>
 
           {qtySelector}
+          {/* WE-fix: Feature bullets above add-to-cart */}
+          <FeatureBullets slug={product.slug} locale={locale} isHe={isHe} />
           {addBtn(true)}
 
           {/* WE-10: Trust strip */}
@@ -324,6 +371,8 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
           <span className="text-xs font-semibold text-green-700">{isHe ? "נותרו רק 2" : "Only 2 left"}</span>
         </div>
         {qtySelector}
+        {/* WE-fix: Feature bullets above add-to-cart (mobile) */}
+        <FeatureBullets slug={product.slug} locale={locale} isHe={isHe} />
 
         {/* Trust strip mobile */}
         <TrustStrip isHe={isHe} locale={locale} />
