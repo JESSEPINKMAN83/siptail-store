@@ -89,7 +89,7 @@ export default async function ProductDetailPage({
       }
     }
   }
-  while (images.length < 4) images.push(PHOTOS[images.length % PHOTOS.length]);
+
 
   // Variants from Wix (if any), otherwise no variants
   const rawVariants: AnyVariant[] =

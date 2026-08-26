@@ -66,6 +66,7 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [mobileImg, setMobileImg] = useState(0);
+  const [desktopImg, setDesktopImg] = useState(0);
   const [sizeOpen, setSizeOpen] = useState(false);
   const router = useRouter();
   const isHe = locale === "he";
@@ -197,19 +198,32 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
     <>
       {/* Desktop layout */}
       <div className="hidden md:grid md:grid-cols-2 gap-10 lg:gap-16">
-        {/* 2×2 image grid */}
-        <div className="grid grid-cols-2 gap-2">
-          {product.images.slice(0, 4).map((url, i) => (
-            <div key={i} className="relative aspect-square overflow-hidden" style={{ background: "#FFFFFF" }}>
-              <ImgBox url={url} alt={`${product.name} ${i + 1}`} />
-              {i === 0 && (
-                <div className={`absolute top-3 flex flex-col gap-1 ${isHe ? "right-3" : "left-3"}`}>
-                  <span className="text-white text-xs font-bold px-2 py-0.5" style={{ background: "#1B4332" }}>{t(locale, "new_arrival")}</span>
-                  <span className="text-white text-xs font-bold px-2 py-0.5" style={{ background: "#4A7C59" }}>-50%</span>
-                </div>
-              )}
+        {/* Gallery: main image + scrollable thumbnail strip — no cap */}
+        <div className="flex flex-col gap-3">
+          {/* Main large image */}
+          <div className="relative aspect-square overflow-hidden" style={{ background: "#FFFFFF" }}>
+            <ImgBox url={product.images[desktopImg] ?? ""} alt={`${product.name} ${desktopImg + 1}`} />
+            <div className={`absolute top-3 flex flex-col gap-1 ${isHe ? "right-3" : "left-3"}`}>
+              <span className="text-white text-xs font-bold px-2 py-0.5" style={{ background: "#1B4332" }}>{t(locale, "new_arrival")}</span>
+              <span className="text-white text-xs font-bold px-2 py-0.5" style={{ background: "#4A7C59" }}>-50%</span>
             </div>
-          ))}
+          </div>
+          {/* Scrollable thumbnail strip — all images, no limit */}
+          {product.images.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "thin" }}>
+              {product.images.map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => setDesktopImg(i)}
+                  className="flex-shrink-0 w-16 h-16 overflow-hidden border-2 transition-colors touch-manipulation"
+                  style={{ borderColor: i === desktopImg ? "#1B4332" : "transparent", background: "#FFFFFF" }}
+                  aria-label={`View image ${i + 1}`}
+                >
+                  <img src={url} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Info panel */}
