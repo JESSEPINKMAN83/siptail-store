@@ -3,7 +3,7 @@
 
 export const WE_CONFIG = {
   // Shipping
-  FREE_SHIPPING_ILS: 199,
+  FREE_SHIPPING_ILS: 149,
   SHIPPING_FEE_ILS: 29,
   FREE_SHIPPING_USD: 50,
 
