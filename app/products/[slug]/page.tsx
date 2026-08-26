@@ -39,6 +39,15 @@ type WixRestProduct = {
     choices?: Record<string, string> | null;
     variant?: { priceData?: { price?: number | null } | null } | null;
   }> | null;
+  // v3 REST API puts variants here, not at product.variants
+  variantsInfo?: {
+    variants?: Array<{
+      id?: string | null;
+      choices?: Array<{ optionChoiceIds?: { optionId?: string; choiceId?: string } }> | null;
+      price?: { actualPrice?: { amount?: string | null } | null } | null;
+      inventoryStatus?: { inStock?: boolean | null } | null;
+    }> | null;
+  } | null;
 };
 
 // Fetch a product using the Wix REST API with MEDIA_ITEMS_INFO so all images come back.
@@ -142,7 +151,13 @@ export default async function ProductDetailPage({
   }
 
   // Variants from Wix (if any)
-  const rawVariants: AnyVariant[] = (wixProduct?.variants as AnyVariant[]) ?? [];
+  // The Wix Stores v3 REST API returns variants at variantsInfo.variants[],
+  // not at product.variants (which is absent from v3 responses).
+  const rawVariants: AnyVariant[] = (
+    (wixProduct?.variantsInfo?.variants as AnyVariant[]) ??
+    (wixProduct?.variants as AnyVariant[]) ??
+    []
+  );
 
   const ilsPrice = formatIls(catalogEntry.ils);
   const basePrice = isHe
