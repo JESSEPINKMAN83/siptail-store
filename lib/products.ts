@@ -20,7 +20,7 @@ export const PRODUCTS = [
   { slug: "trailrest-blanket",          wixId: "d2704572-3f82-4773-915f-bd15dc606855", ils: 69,  category: "outdoor-accessories", heroImage: "https://cf.cjdropshipping.com/e33e9b03-70de-4129-9874-c9a7fac79c66.jpg" },
   { slug: "trailguard-repellent-bands", wixId: "57ea99f1-5799-4ac9-a028-e784fe77ff0d", ils: 25,  category: "outdoor-accessories", heroImage: "https://cf.cjdropshipping.com/05c65cf0-7eef-40c8-bca4-d1ccedf6a2e1.jpg" },
   { slug: "trailcharge-solar-bank",     wixId: "4d6a679e-1f87-493f-97f7-4ef02217fab1", ils: 79,  category: "outdoor-accessories", heroImage: "https://cf.cjdropshipping.com/quick/product/a7eacc6d-f82e-4bca-b8eb-105a8105124a.jpg" },
-  { slug: "trailduo-double-dog-leash",  wixId: "77ad3d1d-09f2-4a0f-a07b-39647aae16bf", ils: 29,  category: "dog-gear",            heroImage: "https://cf.cjdropshipping.com/2044/793695036731.png" },
+  { slug: "trailduo-double-dog-leash",  wixId: "77ad3d1d-09f2-4a0f-a07b-39647aae16bf", ils: 29,  category: "dog-gear",            heroImage: "https://cf.cjdropshipping.com/15445440/6458130631125.jpg" },
 ] as const;
 
 export type ProductSlug = typeof PRODUCTS[number]["slug"];
