@@ -2,7 +2,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { serverAddToCart } from "@/app/actions/cart-actions";
-import { useRouter } from "next/navigation";
 import QuestionForm from "./QuestionForm";
 import NewsletterSignup from "./NewsletterSignup";
 import type { Locale } from "@/lib/translations";
@@ -68,7 +67,6 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
   const [mobileImg, setMobileImg] = useState(0);
   const [desktopImg, setDesktopImg] = useState(0);
   const [sizeOpen, setSizeOpen] = useState(false);
-  const router = useRouter();
   const isHe = locale === "he";
 
   const sel = product.variants.find(v => v.id === selectedVariant) ?? product.variants[0];
@@ -88,8 +86,11 @@ export default function ProductPageClient({ product, locale = "en", waUrl, relat
         window.fbq("track", "AddToCart", { value: priceNum, currency: isHe ? "ILS" : "USD", content_ids: [product.id], content_name: product.name, content_type: "product" });
       }
       setAdded(true);
-      router.refresh();
-      setTimeout(() => router.push("/cart"), 800);
+
+      // Full-page navigation so the browser applies the Set-Cookie headers from
+      // the server action response before the /cart server render fires.
+      // router.push() can race ahead of those headers and render an empty cart.
+      window.location.href = "/cart";
     } catch (e) { console.error("[ProductPage] unexpected:", e); }
     finally { setAdding(false); }
   }
