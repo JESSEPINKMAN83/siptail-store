@@ -10,11 +10,6 @@ import { notFound } from "next/navigation";
 const WIX_SITE_ID = process.env.NEXT_PUBLIC_WIX_SITE_ID || "c9466f44-badc-4481-af3e-2b00fa6472c8";
 const WIX_CLIENT_ID = process.env.NEXT_PUBLIC_WIX_CLIENT_ID || "1d47ce62-8390-4782-86d3-c706cde04ec3";
 
-// Shape returned by the Wix Stores v3 REST GET product endpoint
-// Wix Stores v3 REST GET product response shape.
-// ?fields=MEDIA_ITEMS_INFO populates itemsInfo.items (all images, each with .url directly).
-// The `options` array maps choiceId → human-readable name (e.g. "Black", "S").
-// Variants live at variantsInfo.variants[], NOT product.variants (absent in v3).
 type WixRestProduct = {
   id?: string | null;
   slug?: string | null;
@@ -22,15 +17,12 @@ type WixRestProduct = {
   description?: string | null;
   revision?: string | null;
   media?: {
-    // media.main.url is the direct CDN URL (not nested under .image in v3)
     main?: { url?: string | null; mediaType?: string | null } | null;
     itemsInfo?: {
-      // items[].url is the direct CDN URL (not nested under .image in v3)
       items?: Array<{ url?: string | null; mediaType?: string | null }> | null;
     } | null;
   } | null;
   priceData?: { price?: number | null; currency?: string | null } | null;
-  // options[]: each option has a name (e.g. "Color") and choices with choiceId+name pairs
   options?: Array<{
     id?: string | null;
     name?: string | null;
@@ -38,7 +30,6 @@ type WixRestProduct = {
       choices?: Array<{ choiceId?: string; name?: string }> | null;
     } | null;
   }> | null;
-  // v3 REST: variants live here (product.variants is absent)
   variantsInfo?: {
     variants?: Array<{
       id?: string | null;
@@ -51,11 +42,8 @@ type WixRestProduct = {
   } | null;
 };
 
-// Fetch a product using the Wix REST API with MEDIA_ITEMS_INFO so all images come back.
-// The Wix SDK's queryProducts() never returns media.itemsInfo — only the REST endpoint does.
 async function fetchProductRest(wixId: string): Promise<WixRestProduct | null> {
   try {
-    // Get an anonymous visitor token from the Wix OAuth endpoint
     const tokenRes = await fetch(
       `https://www.wixapis.com/oauth2/token`,
       {
@@ -102,7 +90,6 @@ async function fetchProductRest(wixId: string): Promise<WixRestProduct | null> {
 
 type AnyVariant = {
   _id?: string | null; id?: string | null;
-  // v3 REST: choices is an array of {optionChoiceIds} objects, not a Record
   choices?: Array<{ optionChoiceIds?: { optionId?: string; choiceId?: string } }> | null;
   variant?: { priceData?: { formatted?: { price?: string | null } | null } | null } | null;
   price?: { actualPrice?: { amount?: string | null } | null } | null;
@@ -118,20 +105,14 @@ function getVariantPrice(v: AnyVariant): string {
     ?? "";
 }
 
-// Convert wix:image://v1/<fileId>/filename.jpg#originWidth=W&originHeight=H
-// → https://static.wixstatic.com/media/<fileId>/v1/fit/w_800,h_800,q_85/filename.jpg
-// Also handles already-HTTPS URLs (pass-through).
 function toWixStaticUrl(raw: string | null | undefined, w = 800, h = 800): string | null {
   if (!raw) return null;
   if (raw.startsWith("https://") || raw.startsWith("http://")) return raw;
-  // wix:image://v1/<fileId>/<filename>#originWidth=W&originHeight=H
   const m = raw.match(/^wix:image:\/\/v1\/([^/]+)\/([^#?]+)/);
-  if (!m) return raw; // unknown format, pass through
+  if (!m) return raw;
   const [, fileId, filename] = m;
   return `https://static.wixstatic.com/media/${fileId}/v1/fit/w_${w},h_${h},q_85/${filename}`;
 }
-
-
 
 export default async function ProductDetailPage({
   params,
@@ -142,7 +123,6 @@ export default async function ProductDetailPage({
   const locale = await getLocale();
   const isHe = locale === "he";
 
-  // 404 for unknown slugs
   const catalogEntry = getProductBySlug(slug);
   if (!catalogEntry) {
     notFound();
@@ -152,31 +132,20 @@ export default async function ProductDetailPage({
   const englishName = t("en", `product.${slug}.name` as any) || slug;
   const displayName = isHe ? hebrewName : englishName;
 
-  // REST fetch with MEDIA_ITEMS_INFO — gets all images, not just the first
   const wixProduct = await fetchProductRest(catalogEntry.wixId);
 
-  // Build image array from all itemsInfo.items, then main as fallback.
-  // Wix v3 REST: items[].url is the direct CJ/CDN URL (HTTPS already).
-  // toWixStaticUrl() handles wix:image:// URIs too (pass-through for HTTPS).
   const images: string[] = [];
   const allItems = wixProduct?.media?.itemsInfo?.items ?? [];
   for (const item of allItems) {
     const converted = toWixStaticUrl(item?.url);
     if (converted && !images.includes(converted)) images.push(converted);
   }
-  // If itemsInfo was empty, fall back to media.main
   if (images.length === 0) {
     const mainConverted = toWixStaticUrl(wixProduct?.media?.main?.url);
     if (mainConverted) images.push(mainConverted);
   }
-  // Last fallback: heroImage from the static catalog
-  if (images.length === 0 && catalogEntry.heroImage) {
-    images.push(catalogEntry.heroImage);
-  }
+  // No heroImage field in TeqPet catalog; live Wix images populate once media is uploaded.
 
-  // Variants from Wix (if any)
-  // The Wix Stores v3 REST API returns variants at variantsInfo.variants[],
-  // not at product.variants (which is absent from v3 responses).
   const rawVariants: AnyVariant[] = (
     (wixProduct?.variantsInfo?.variants as AnyVariant[]) ?? []
   );
@@ -186,17 +155,13 @@ export default async function ProductDetailPage({
     ? ilsPrice
     : `$${(catalogEntry.ils / 3.7).toFixed(2)}`;
 
-  // Build a choiceId → display name map from the product's options array.
-  // Wix v3 REST: variant.choices[].optionChoiceIds.choiceId references
-  // product.options[].choicesSettings.choices[].choiceId, which holds the English name.
-  // Then map English names → Hebrew translations for the he locale.
   const heColorMap: Record<string, string> = {
-    Black: "שחור", Blue: "כחול", Red: "אדום", Purple: "סגול",
-    Green: "ירוק", White: "לבן", Yellow: "צהוב", Orange: "כתום",
+    Black: "\u05e9\u05d7\u05d5\u05e8", Blue: "\u05db\u05d7\u05d5\u05dc", Red: "\u05d0\u05d3\u05d5\u05dd", Purple: "\u05e1\u05d2\u05d5\u05dc",
+    Green: "\u05d9\u05e8\u05d5\u05e7", White: "\u05dc\u05d1\u05df", Yellow: "\u05e6\u05d4\u05d5\u05d1", Orange: "\u05db\u05ea\u05d5\u05dd",
   };
   const heSizeMap: Record<string, string> = {
     S: "S", M: "M", L: "L", XL: "XL",
-    Small: "קטן", Medium: "בינוני", Large: "גדול",
+    Small: "\u05e7\u05d8\u05df", Medium: "\u05d1\u05d9\u05e0\u05d5\u05e0\u05d9", Large: "\u05d2\u05d3\u05d5\u05dc",
   };
   function hebrewifyChoiceName(name: string): string {
     return heColorMap[name] ?? heSizeMap[name] ?? name;
@@ -217,15 +182,12 @@ export default async function ProductDetailPage({
     });
     return {
       id: getVariantId(v),
-      label: choiceNames.join(" / ") || (isHe ? "ברירת מחדל" : "Default"),
+      label: choiceNames.join(" / ") || (isHe ? "\u05d1\u05e8\u05d9\u05e8\u05ea \u05de\u05d7\u05d3\u05dc" : "Default"),
       price: basePrice,
       rawPrice: getVariantPrice(v),
     };
   });
 
-  // Use translated description from translations.ts (Hebrew or English).
-  // The Wix API description field is often empty or raw HTML for headless products;
-  // translations.ts has the full, formatted product copy.
   const translationDescKey = `product.${slug}.description` as any;
   const descriptionFromTranslations = t(locale, translationDescKey);
   const description =
@@ -237,7 +199,6 @@ export default async function ProductDetailPage({
 
   return (
     <div style={{ background: "#F5F4F0" }} dir={isHe ? "rtl" : "ltr"}>
-      {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
         <nav
           className="flex items-center gap-2 text-xs flex-wrap"
@@ -245,18 +206,17 @@ export default async function ProductDetailPage({
           aria-label="breadcrumb"
         >
           <Link href={`/?lang=${locale}`} className="hover:text-[#1B4332] transition-colors" style={{ color: "#6B7280" }}>
-            {isHe ? "בית" : "Home"}
+            {isHe ? "\u05d1\u05d9\u05ea" : "Home"}
           </Link>
-          <span style={{ color: "#D4E6D4" }}>{isHe ? "‹" : "›"}</span>
+          <span style={{ color: "#D4E6D4" }}>{isHe ? "\u2039" : "\u203a"}</span>
           <Link href={`/products?lang=${locale}`} className="hover:text-[#1B4332] transition-colors" style={{ color: "#6B7280" }}>
-            {isHe ? "חנות" : "Shop"}
+            {isHe ? "\u05d7\u05e0\u05d5\u05ea" : "Shop"}
           </Link>
-          <span style={{ color: "#D4E6D4" }}>{isHe ? "‹" : "›"}</span>
+          <span style={{ color: "#D4E6D4" }}>{isHe ? "\u2039" : "\u203a"}</span>
           <span style={{ color: "#1A1A1A" }}>{displayName}</span>
         </nav>
       </div>
 
-      {/* Shipping contract */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-0">
         <div
           className="flex flex-wrap gap-4 text-xs py-3 border-b"
@@ -264,15 +224,14 @@ export default async function ProductDetailPage({
         >
           <span>
             <strong style={{ color: "#1B4332" }}>{t(locale, "shipping.homeDelivery")}</strong>
-            {" · "}{t(locale, "shipping.businessDays")}
-            {" · "}{t(locale, "shipping.belowThreshold")}
-            {" · "}{t(locale, "shipping.aboveThreshold")}
+            {" \u00b7 "}{t(locale, "shipping.businessDays")}
+            {" \u00b7 "}{t(locale, "shipping.belowThreshold")}
+            {" \u00b7 "}{t(locale, "shipping.aboveThreshold")}
           </span>
           <span style={{ color: "#6B7280" }}>{t(locale, "shipping.leadTime")}</span>
         </div>
       </div>
 
-      {/* Main product */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-32 md:pb-10">
         <ProductPageClient
           product={{
