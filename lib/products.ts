@@ -1,26 +1,40 @@
-// Walk Essentials — static product catalog
-// Source of truth for slugs, Wix product IDs, ₪ prices, categories, and hero image fallbacks.
-// Wix API provides images and stock status; this file provides everything else.
-// heroImage is a fallback shown while Wix media propagates, sourced from CJ Dropshipping CDN.
+// TeqPet — static product catalog
+// Source of truth for slugs, Wix product IDs (from the TeqPet Wix site), ILS prices, and categories.
+// These 23 products are confirmed live on the TeqPet Wix backend (metaSiteId 44cb7e7b-183f-40d1-bcfd-7c2d95e536ab).
 
 export const PRODUCTS = [
-  { slug: "siptail-trail-bottle",       wixId: "62ebc9f7-1e77-4595-aa6b-53aa6c225c70", ils: 59,  category: "dog-gear",            heroImage: "https://cdn.cjdropshipping.com/product/1510128912444985344/1.jpg" },
-  { slug: "trailcool-cooling-vest",     wixId: "040a4d17-a53c-420a-9a48-3a22789c93a0", ils: 69,  category: "dog-gear",            heroImage: "https://cj-product-center.oss-accelerate.aliyuncs.com/supplier/1688/e201847b-8a49-4425-b51f-f5613ce55c2e.jpg" },
-  { slug: "trailpop-dog-bowl",          wixId: "5582bb18-81b8-44f7-9b99-e969098623c2", ils: 29,  category: "dog-gear",            heroImage: "https://cf.cjdropshipping.com/78e7e883-a610-4c7d-a0f8-d2e3e99e3a66.jpg" },
-  { slug: "trailrun-hands-free-leash",  wixId: "8e47c5f5-f179-4f00-b3c5-f235329bd650", ils: 39,  category: "dog-gear",            heroImage: "https://cj-product-center.oss-accelerate.aliyuncs.com/supplier/1688/0a234bad-1817-4b4c-b7f5-ac06cf0ddaa5.jpg" },
-  { slug: "coolwrap-trail-towel",       wixId: "102495a8-2ec2-45cf-b038-74a6368d2806", ils: 29,  category: "hiking-gear",         heroImage: "https://cf.cjdropshipping.com/17870112/36ce14fc-3fd5-40e8-8f60-acba82796371.jpg" },
-  { slug: "trailtrack-dog-harness",     wixId: "e81ea2b2-a15f-406d-915a-afe1001ab463", ils: 89,  category: "dog-gear",            heroImage: "https://cj-product-center.oss-accelerate.aliyuncs.com/supplier/1688/5d63fce0-01c9-425a-b06d-92bfece7a882.jpg" },
-  { slug: "trailshield-phone-pouch",    wixId: "92c0f7ed-4cdd-437b-b646-5c3238009274", ils: 39,  category: "outdoor-accessories", heroImage: "https://cj-product-center.oss-accelerate.aliyuncs.com/supplier/1688/79b1012b-85c2-4c7c-8a88-25f96b001ab6.jpg" },
-  { slug: "coolrest-dog-mat",           wixId: "be4266f0-4d97-4c1c-abcb-71635c567089", ils: 69,  category: "dog-gear",            heroImage: "https://cf.cjdropshipping.com/quick/product/c2f365fa-fa4e-4865-9d19-3be1672092bc.jpg" },
-  { slug: "aquatrail-dog-life-jacket",  wixId: "464f0043-5b70-4341-9cbe-fbbff7529678", ils: 89,  category: "dog-gear",            heroImage: "https://cj-product-center.oss-accelerate.aliyuncs.com/supplier/1688/5d63fce0-01c9-425a-b06d-92bfece7a882.jpg" },
-  { slug: "trailpaws-dog-boots",        wixId: "2c424565-1a38-4617-bce1-a17609a12a14", ils: 49,  category: "dog-gear",            heroImage: "https://cj-product-center.oss-accelerate.aliyuncs.com/supplier/1688/c8b43a6a-f066-4c07-8e36-f592ac5e767d.jpg" },
-  { slug: "trailpaws-paw-wax",          wixId: "eac5dace-e7f0-4a74-b2c5-5ffffd5036ff", ils: 29,  category: "dog-gear",            heroImage: "https://cj-product-center.oss-accelerate.aliyuncs.com/supplier/1688/c8b43a6a-f066-4c07-8e36-f592ac5e767d.jpg" },
-  { slug: "trailvest-hydration-pack",   wixId: "d51e5da0-bead-4d96-b419-f1af3b1b583d", ils: 119, category: "hiking-gear",         heroImage: "https://cf.cjdropshipping.com/fecc7fed-2dc9-459c-a7a9-d9c74aab2a10.png" },
-  { slug: "trailshade-sun-hat",         wixId: "49af0250-bc1c-4b54-b95f-ba934ff07b68", ils: 39,  category: "hiking-gear",         heroImage: "https://cf.cjdropshipping.com/quick/product/0fa45535-2f4e-445f-a02e-c630ad79a9d9.jpg" },
-  { slug: "trailrest-blanket",          wixId: "d2704572-3f82-4773-915f-bd15dc606855", ils: 69,  category: "outdoor-accessories", heroImage: "https://cf.cjdropshipping.com/e33e9b03-70de-4129-9874-c9a7fac79c66.jpg" },
-  { slug: "trailguard-repellent-bands", wixId: "57ea99f1-5799-4ac9-a028-e784fe77ff0d", ils: 25,  category: "outdoor-accessories", heroImage: "https://cf.cjdropshipping.com/05c65cf0-7eef-40c8-bca4-d1ccedf6a2e1.jpg" },
-  { slug: "trailcharge-solar-bank",     wixId: "4d6a679e-1f87-493f-97f7-4ef02217fab1", ils: 79,  category: "outdoor-accessories", heroImage: "https://cf.cjdropshipping.com/quick/product/a7eacc6d-f82e-4bca-b8eb-105a8105124a.jpg" },
-  { slug: "trailduo-double-dog-leash",  wixId: "77ad3d1d-09f2-4a0f-a07b-39647aae16bf", ils: 29,  category: "dog-gear",            heroImage: "https://cf.cjdropshipping.com/15445440/6458130631125.jpg" },
+  // Smart Feeders (3)
+  { slug: "\u05de\u05d6\u05d9\u05df-\u05d0\u05d5\u05d8\u05d5\u05de\u05d8\u05d9-wifi-\u05e2\u05dd-\u05de\u05e6\u05dc\u05de\u05d4-hd-4l",           wixId: "e1f0db48-a191-4a2c-a1ab-b27163eaf807", ils: 349, category: "smart-feeders" },
+  { slug: "\u05de\u05d6\u05d9\u05df-\u05d0\u05d5\u05d8\u05d5\u05de\u05d8\u05d9-\u05db\u05e4\u05d5\u05dc-wifi-\u05e2\u05dd-\u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d4-6l",       wixId: "fd902e22-a113-43f2-bb4c-7d8bf1bc7e39", ils: 299, category: "smart-feeders" },
+  { slug: "\u05e7\u05e2\u05e8\u05ea-\u05d4\u05d0\u05db\u05dc\u05d4-\u05d0\u05d9\u05d8\u05d9\u05ea-\u05de\u05d7\u05e6\u05dc\u05ea-\u05dc\u05d9\u05e7\u05d5\u05e7-\u05e1\u05d9\u05dc\u05d9\u05e7\u05d5\u05df",         wixId: "112a75c4-9ed2-4ec5-8fa8-1f33325e6200", ils: 79,  category: "smart-feeders" },
+  // Smart Water Fountains (3)
+  { slug: "\u05de\u05d6\u05e8\u05e7\u05ea-\u05e0\u05d9\u05e8\u05d5\u05e1\u05d8\u05d4-\u05d7\u05e9\u05de\u05dc\u05d9\u05ea-25l-3-\u05e9\u05dc\u05d1\u05d9-\u05e1\u05d9\u05e0\u05d5\u05df",       wixId: "c84b3124-8220-401f-aab3-7e9c6871c273", ils: 199, category: "water-fountains" },
+  { slug: "\u05de\u05d6\u05e8\u05e7\u05d4-\u05d0\u05dc\u05d7\u05d5\u05d8\u05d9\u05ea-35l-\u05e2\u05dd-\u05d7\u05d9\u05d9\u05e9\u05df-\u05ea\u05e0\u05d5\u05e2\u05d4-\u05de\u05e0\u05d5\u05e2-\u05e9\u05e7\u05d8",   wixId: "38be9bc1-cf4a-470f-8fbe-90d4fd11078a", ils: 249, category: "water-fountains" },
+  { slug: "\u05de\u05d6\u05e8\u05e7\u05ea-\u05e0\u05d9\u05e8\u05d5\u05e1\u05d8\u05d4-\u05d0\u05dc\u05d7\u05d5\u05d8\u05d9\u05ea-32l-5000mah-\u05d7\u05d9\u05d9\u05e9\u05df-\u05ea\u05e0\u05d5\u05e2\u05d4", wixId: "c43a6814-27de-4523-870c-22df3b59259e", ils: 279, category: "water-fountains" },
+  // GPS Trackers (2)
+  { slug: "\u05d2\u05e9\u05de\u05df-gps-\u05de\u05d9\u05e0\u05d9-\u05e7\u05dc\u05d9\u05e4-\u05d0\u05d5\u05df-bluetooth-gps-\u05dc\u05dc\u05d0-sim", wixId: "6b5b8fca-fc83-4992-a43d-100a91790228", ils: 149, category: "gps-tracking" },
+  { slug: "\u05d2\u05e9\u05de\u05df-gps-\u05e2\u05de\u05d9\u05d3-\u05dc\u05de\u05d9\u05dd-\u05e2\u05dd-\u05de\u05d9\u05e7\u05d5\u05dd-\u05d1\u05d6\u05de\u05df-\u05d0\u05de\u05ea",         wixId: "0dae9cb9-68d5-49c7-aaf5-5eebf7d961f8", ils: 199, category: "gps-tracking" },
+  // Smart Toys (2)
+  { slug: "\u05e6\u05e2\u05e6\u05d5\u05e2-\u05dc\u05d9\u05d9\u05d6\u05e8-\u05d0\u05d5\u05d8\u05d5\u05de\u05d8\u05d9-\u05dc\u05d7\u05ea\u05d5\u05dc\u05d9\u05dd-360-usb-c",        wixId: "b540f03a-3ee8-4263-bfb7-22d318511d52", ils: 99,  category: "smart-toys" },
+  { slug: "\u05e6\u05e2\u05e6\u05d5\u05e2-\u05e2\u05e6\u05dd-\u05de\u05ea\u05d2\u05dc\u05d2\u05dc-\u05d7\u05db\u05dd-\u05dc\u05db\u05dc\u05d1\u05d9\u05dd-usb-c",            wixId: "d07763eb-9cab-4068-a72c-abcc0a4be2a9", ils: 89,  category: "smart-toys" },
+  // Grooming Tech (4)
+  { slug: "\u05de\u05d1\u05e8\u05e9\u05ea-\u05d2\u05e8\u05d9\u05e4\u05d4-3-\u05d1-1-\u05e2\u05dd-\u05e7\u05d9\u05d8\u05d5\u05e8-\u05d4\u05d5\u05e8\u05d3\u05ea-\u05e9\u05d9\u05e2\u05e8-\u05e8\u05d9\u05e1\u05d5\u05e1-\u05e2\u05d9\u05e1\u05d5\u05d9", wixId: "8d2672cb-6b27-4b5d-b3fd-342bcdf78fdf", ils: 149, category: "tech-grooming" },
+  { slug: "\u05de\u05e0\u05e7\u05d4-\u05db\u05e4\u05d5\u05ea-\u05d7\u05e9\u05de\u05dc\u05d9-usb-c-\u05de\u05d1\u05e8\u05e9\u05ea-\u05e1\u05d9\u05dc\u05d9\u05e7\u05d5\u05df",           wixId: "3e89c0a5-740e-4cab-baff-c5dc91e94999", ils: 89,  category: "tech-grooming" },
+  { slug: "\u05de\u05e9\u05d7\u05d6\u05ea-\u05e6\u05d9\u05e4\u05d5\u05e8\u05e0\u05d9\u05d9\u05dd-\u05d7\u05e9\u05de\u05dc\u05d9\u05ea-3-\u05de\u05d4\u05d9\u05e8\u05d5\u05d9\u05d5\u05ea-usb-c-\u05e9\u05e7\u05d8",   wixId: "2376d667-2b5b-4fb3-832b-6969d6b9ab2f", ils: 99,  category: "tech-grooming" },
+  { slug: "\u05de\u05e1\u05e4\u05e8\u05d9\u05d9\u05dd-\u05de\u05e9\u05d7\u05d6\u05ea-\u05e6\u05d9\u05e4\u05d5\u05e8\u05e0\u05d9\u05d9\u05dd-2-\u05d1-1-\u05e2\u05dd-\u05ea\u05d0\u05d5\u05e8\u05ea-led",    wixId: "8a70eb2c-cb46-4db6-a89a-c705c8122158", ils: 79,  category: "tech-grooming" },
+  // Grooming Accessories (1)
+  { slug: "\u05de\u05d2\u05d1\u05d5\u05e0\u05d9\u05dd-\u05dc\u05d0\u05e6\u05d1\u05e2-3-\u05d1-1-\u05dc\u05d7\u05d9\u05d5\u05ea-\u05de\u05d7\u05de\u05d3-50-\u05d9\u05d7\u05d9\u05d3\u05d5\u05ea-\u05e9\u05d9\u05e0\u05d9\u05d9\u05dd-\u05e2\u05d9\u05e0\u05d9\u05d9\u05dd-\u05d0\u05d5\u05d6\u05e0\u05d9\u05d9\u05dd", wixId: "ca1c7a83-2f5a-47f8-8f66-581d8130accb", ils: 49,  category: "grooming-accessories" },
+  // Travel Accessories (4)
+  { slug: "\u05d1\u05e7\u05d1\u05d5\u05e7-\u05e0\u05e1\u05d9\u05e2\u05d4-2-\u05d1-1-\u05e0\u05d9\u05e8\u05d5\u05e1\u05d8\u05d4-285ml-\u05de\u05ea\u05e7\u05e4\u05dc-\u05dc\u05e7\u05e2\u05e8\u05d4",  wixId: "34de7c6b-68f7-4091-b71b-614bbb1855d2", ils: 79,  category: "travel-accessories" },
+  { slug: "\u05ea\u05d9\u05e7-\u05d2\u05d1-\u05e0\u05e9\u05d9\u05d0\u05d4-\u05e4\u05e8\u05d9\u05de\u05d9\u05d5\u05dd-\u05dc\u05d7\u05ea\u05d5\u05dc\u05d9\u05dd-\u05d5\u05db\u05dc\u05d1\u05d9\u05dd-\u05e7\u05d8\u05e0\u05d9\u05dd-\u05d7\u05dc\u05d5\u05df-\u05e2\u05d2\u05d5\u05dc", wixId: "5be6abba-5db3-4169-ba57-79be29b09d70", ils: 249, category: "travel-accessories" },
+  { slug: "\u05e8\u05ea\u05de\u05ea-\u05d1\u05d8\u05d9\u05d7\u05d5\u05ea-\u05dc\u05e8\u05db\u05d1-\u05dc\u05db\u05dc\u05d1\u05d9\u05dd-\u05d0\u05d1\u05d6\u05dd-crash-tested-\u05e8\u05e4\u05dc\u05e7\u05d8\u05d9\u05d1\u05d9", wixId: "ad5b9d16-6d2f-4668-92f0-15f318d57dd5", ils: 129, category: "travel-accessories" },
+  { slug: "\u05e8\u05e6\u05d5\u05e2\u05ea-\u05db\u05dc\u05d1-hands-free-\u05e2\u05dd-\u05d1\u05e0\u05d2\u05d9-\u05e8\u05e4\u05dc\u05e7\u05d8\u05d9\u05d1\u05d9-\u05db\u05d9\u05e1-\u05dc\u05d8\u05dc\u05e4\u05d5\u05df", wixId: "1186163b-f3d4-4b6d-97aa-434bf8edeabe", ils: 99,  category: "travel-accessories" },
+  // Pet Cameras (2)
+  { slug: "\u05de\u05e6\u05dc\u05de\u05ea-\u05d7\u05d9\u05d5\u05ea-\u05de\u05d6\u05d9\u05df-\u05e4\u05d9\u05e0\u05d5\u05e7\u05d9\u05dd-hd-\u05e9\u05de\u05e2-\u05d3\u05d5-\u05db\u05d9\u05d5\u05d5\u05e0\u05d9-\u05e9\u05dc\u05d9\u05d8\u05d4-\u05de\u05e8\u05d7\u05d5\u05e7", wixId: "94341fe6-9556-47cd-bd7e-90d06558f113", ils: 299, category: "pet-cameras" },
+  { slug: "\u05de\u05e6\u05dc\u05de\u05ea-\u05d7\u05d9\u05d5\u05ea-\u05de\u05d7\u05de\u05d3-1080p-\u05e8\u05d0\u05d9\u05d9\u05ea-\u05dc\u05d9\u05dc\u05d4-\u05e9\u05de\u05e2-\u05d3\u05d5-\u05db\u05d9\u05d5\u05d5\u05e0\u05d9-wifi", wixId: "44664d1f-9dcb-4504-8ed6-eed93835faf1", ils: 199, category: "pet-cameras" },
+  // Activity Monitors (2)
+  { slug: "\u05ea\u05d2-\u05de\u05d5\u05e0\u05d9\u05d8\u05d5\u05e8-\u05d1\u05e8\u05d9\u05d0\u05d5\u05ea-\u05dc\u05d7\u05d9\u05d5\u05ea-\u05e9\u05d9\u05e0\u05d4-\u05e7\u05dc\u05d5\u05e8\u05d9\u05d5\u05ea-\u05e6\u05e2\u05d3\u05d9\u05dd-\u05dc\u05dc\u05d0-gps", wixId: "d02c1336-c429-48a6-8148-cf48ffe2174d", ils: 99,  category: "activity-monitors" },
+  { slug: "\u05de\u05e2\u05e7\u05d1-\u05e4\u05e2\u05d9\u05dc\u05d5\u05ea-\u05d7\u05db\u05dd-\u05dc\u05e6\u05d5\u05d5\u05d0\u05e8\u05d5\u05df-gps-\u05e1\u05e4\u05d9\u05e8\u05ea-\u05e6\u05e2\u05d3\u05d9\u05dd-\u05d1\u05e8\u05d9\u05d0\u05d5\u05ea", wixId: "4d673c49-78ed-4a21-bf8f-abcaf601faf6", ils: 149, category: "activity-monitors" },
 ] as const;
 
 export type ProductSlug = typeof PRODUCTS[number]["slug"];
@@ -38,5 +52,5 @@ export function getProductByWixId(wixId: string) {
 
 /** Format an ILS price for display. */
 export function formatIls(ils: number): string {
-  return `₪${ils}`;
+  return `\u20aa${ils}`;
 }
