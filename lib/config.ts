@@ -1,5 +1,7 @@
-// ── Walk Essentials — central config ────────────────────────────────────────
+// ── TeqPet — central config ──────────────────────────────────────────────────
 // Change ONE place, applies everywhere
+
+export const TEQPET_LOGO_URL = "https://static.wixstatic.com/media/70d502_e3e96278eb1444ef83de9003d1ad6795~mv2.jpg";
 
 export const WE_CONFIG = {
   // Shipping
@@ -16,23 +18,17 @@ export const WE_CONFIG = {
   WHATSAPP_NUMBER: "972509033022",
   WHATSAPP_PREFILL_HE: encodeURIComponent("שלום, יש לי שאלה לגבי המוצר"),
   WHATSAPP_PREFILL_EN: encodeURIComponent("Hello, I have a question about the product"),
-  EMAIL: "hello@walkessentials.com",
+  EMAIL: "hello@teqpet.com",
   SUPPORT_HOURS_HE: "א׳–ה׳ 9:00–18:00",
   SUPPORT_HOURS_EN: "Sun–Thu 9:00–18:00",
 
-  // Product images — CJJJCWGY00675 (Portable dog water bottle 520ml)
-  // TODO: Replace with actual CJ CDN URLs once bot-protection bypassed
-  // These are real dog/bottle photos from public sources
-  // PRODUCT_IMAGES: Wix-hosted product images (uploaded to static.wixstatic.com)
-  // First 2 are real images already on the Wix CDN.
-  // TODO: Replace positions 3-5 with actual CJ CJJJCWGY00675 CDN URLs when available.
-  // To get CJ URLs: log into cjdropshipping.com → My Products → right-click images → Copy image address
+  // Product images — TeqPet logo as default placeholder
   PRODUCT_IMAGES: [
-    "https://static.wixstatic.com/media/70d502_6f9c72717a5c4e79b164c77b6b9f7551~mv2.jpg", // Wix CDN — real product image 1
-    "https://static.wixstatic.com/media/70d502_96ef2f76e9934a03897754717970efbd~mv2.jpg", // Wix CDN — real product image 2
-    "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=800", // placeholder — replace with CJ
-    "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=800", // placeholder — replace with CJ
-    "https://images.pexels.com/photos/2253275/pexels-photo-2253275.jpeg?auto=compress&cs=tinysrgb&w=800", // placeholder — replace with CJ
+    "https://static.wixstatic.com/media/70d502_e3e96278eb1444ef83de9003d1ad6795~mv2.jpg",
+    "https://static.wixstatic.com/media/70d502_6f9c72717a5c4e79b164c77b6b9f7551~mv2.jpg",
+    "https://static.wixstatic.com/media/70d502_96ef2f76e9934a03897754717970efbd~mv2.jpg",
+    "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=800",
+    "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg?auto=compress&cs=tinysrgb&w=800",
   ],
 } as const;
 
@@ -50,9 +46,7 @@ export function ilsFromUsd(usdStr: string | null | undefined): string {
   return `₪${ils}`;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Real Wix Stores product — created 2026-08-23
-// ─────────────────────────────────────────────────────────────────────────────
+// Legacy compat — product IDs unchanged
 export const SIPTAIL_PRODUCT_ID = "62ebc9f7-1e77-4595-aa6b-53aa6c225c70";
 export const SIPTAIL_VARIANTS = {
   "Small 350ml":  "b3e03437-f927-469b-838c-f97ac95f1113",

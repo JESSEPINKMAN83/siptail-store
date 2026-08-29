@@ -5,9 +5,10 @@ import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/translations";
 import { PRODUCTS, formatIls, type ProductCategory } from "@/lib/products";
 import Link from "next/link";
+import { TEQPET_LOGO_URL } from "@/lib/config";
 
-// Brand green placeholder SVG as a data URL — shown when Wix image is missing
-const PLACEHOLDER_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%231B4332'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='48' fill='%23D4E6D4'>WE</text></svg>`;
+// TeqPet navy placeholder SVG when Wix image is missing
+const PLACEHOLDER_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='400' height='400' fill='%231B2A4A'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter,sans-serif' font-size='48' fill='%23FF6B2B'>TeqPet</text></svg>`;
 
 type WixProduct = {
   _id?: string | null;
@@ -40,6 +41,20 @@ async function fetchAllWixProducts(): Promise<WixProduct[]> {
   }
 }
 
+// All 9 TeqPet category filter tabs
+const CATEGORY_TABS = [
+  { key: "all",                   labelHe: "כל המוצרים",    labelEn: "All" },
+  { key: "smart-feeders",         labelHe: "מזינים חכמים",   labelEn: "Smart Feeders" },
+  { key: "water-fountains",       labelHe: "מזרקות מים",    labelEn: "Water Fountains" },
+  { key: "gps-tracking",          labelHe: "GPS ומעקב",     labelEn: "GPS & Tracking" },
+  { key: "smart-toys",            labelHe: "צעצועים חכמים", labelEn: "Smart Toys" },
+  { key: "tech-grooming",         labelHe: "טיפוח טכנולוגי",labelEn: "Tech Grooming" },
+  { key: "grooming-accessories",  labelHe: "אביזרי טיפוח",  labelEn: "Grooming Accessories" },
+  { key: "travel-accessories",    labelHe: "אביזרי טיול",   labelEn: "Travel Accessories" },
+  { key: "pet-cameras",           labelHe: "מצלמות חיות",   labelEn: "Pet Cameras" },
+  { key: "activity-monitors",     labelHe: "מוניטורי פעילות",labelEn: "Activity Monitors" },
+];
+
 export default async function ProductsPage({
   searchParams,
 }: {
@@ -50,65 +65,50 @@ export default async function ProductsPage({
   const params = await searchParams;
   const activeCategory = (params.cat ?? "all") as ProductCategory | "all";
 
-  // Fetch live Wix products for images
+  // Fetch live Wix products
   const wixProducts = await fetchAllWixProducts();
 
-  // Build a map from wixId → image URL
-  const wixImageMap = new Map<string, string>();
-  for (const wp of wixProducts) {
-    const id = wp._id;
-    const url = wp.media?.mainMedia?.image?.url ?? null;
-    if (id && url) wixImageMap.set(id, url);
+  // If Wix has products, use them directly; otherwise fall back to catalog
+  let displayProducts: DisplayProduct[];
+
+  if (wixProducts.length > 0) {
+    // Use live Wix products directly
+    displayProducts = wixProducts.map((wp) => ({
+      slug: wp.slug ?? wp._id ?? "product",
+      ils: 0, // price comes from Wix directly in PDP
+      category: "all",
+      nameEn: wp.name ?? "Product",
+      nameHe: wp.name ?? "מוצר",
+      imageUrl: wp.media?.mainMedia?.image?.url ?? null,
+      wixId: wp._id ?? "",
+    }));
+  } else {
+    // Fallback: static catalog
+    const wixImageMap = new Map<string, string>();
+    for (const wp of wixProducts) {
+      const id = wp._id;
+      const url = wp.media?.mainMedia?.image?.url ?? null;
+      if (id && url) wixImageMap.set(id, url);
+    }
+    displayProducts = PRODUCTS.map((entry: CatalogEntry) => {
+      const imageUrl = wixImageMap.get(entry.wixId) ?? null;
+      const nameEn = t("en", `product.${entry.slug}.name` as any) || entry.slug;
+      const nameHe = t("he", `product.${entry.slug}.name` as any) || nameEn;
+      return { slug: entry.slug, ils: entry.ils, category: entry.category, nameEn, nameHe, imageUrl, wixId: entry.wixId };
+    });
   }
-
-  // Also build a slug→wixProduct map for slug-based lookup
-  const wixSlugMap = new Map<string, WixProduct>();
-  for (const wp of wixProducts) {
-    if (wp.slug) wixSlugMap.set(wp.slug, wp);
-  }
-
-  // Merge catalog with live Wix data
-  const displayProducts: DisplayProduct[] = PRODUCTS.map((entry: CatalogEntry) => {
-    // Try by wixId first, then by slug
-    const imageFromId = wixImageMap.get(entry.wixId) ?? null;
-    const wixBySlug = wixSlugMap.get(entry.slug);
-    const imageFromSlug = wixBySlug?.media?.mainMedia?.image?.url ?? null;
-    const imageUrl = imageFromId ?? imageFromSlug ?? null;
-
-    const nameEn = t("en", `product.${entry.slug}.name` as any) || entry.slug;
-    const nameHe = t("he", `product.${entry.slug}.name` as any) || nameEn;
-
-    return {
-      slug: entry.slug,
-      ils: entry.ils,
-      category: entry.category,
-      nameEn,
-      nameHe,
-      imageUrl,
-      wixId: entry.wixId,
-    };
-  });
-
-  const categories: { key: ProductCategory | "all"; labelKey: any }[] = [
-    { key: "all",                  labelKey: "category.all" },
-    { key: "dog-gear",             labelKey: "category.dog-gear" },
-    { key: "hiking-gear",          labelKey: "category.hiking-gear" },
-    { key: "outdoor-accessories",  labelKey: "category.outdoor-accessories" },
-  ];
 
   const filtered =
-    activeCategory === "all"
+    activeCategory === "all" || wixProducts.length > 0
       ? displayProducts
       : displayProducts.filter((p) => p.category === activeCategory);
 
-  const missingImages = displayProducts.filter((p) => !p.imageUrl).map((p) => p.slug);
-
   return (
-    <div style={{ background: "#F5F4F0" }} dir={isHe ? "rtl" : "ltr"}>
+    <div style={{ background: "#FFFFFF" }} dir={isHe ? "rtl" : "ltr"}>
       {/* Free shipping banner */}
       <div
         className="w-full text-center text-sm py-2 font-medium"
-        style={{ background: "#1B4332", color: "#D4E6D4" }}
+        style={{ background: "#1B2A4A", color: "#D0D8EC" }}
       >
         {t(locale, "products.free.shipping")}
       </div>
@@ -120,19 +120,19 @@ export default async function ProductsPage({
           style={{
             fontFamily: isHe
               ? "Noto Serif Hebrew, Georgia, serif"
-              : "Georgia, 'Times New Roman', serif",
-            color: "#1A1A1A",
+              : "Inter, system-ui, sans-serif",
+            color: "#1B2A4A",
             textAlign: isHe ? "right" : "left",
           }}
         >
-          {t(locale, "products.page.title")}
+          {isHe ? "כל מוצרי TeqPet" : "Shop TeqPet"}
         </h1>
 
-        {/* Category filter tabs */}
+        {/* Category filter tabs — all 9 collections */}
         <div
           className={`flex gap-2 mb-8 flex-wrap ${isHe ? "justify-end" : "justify-start"}`}
         >
-          {categories.map(({ key, labelKey }) => {
+          {CATEGORY_TABS.map(({ key, labelHe, labelEn }) => {
             const isActive = activeCategory === key;
             return (
               <Link
@@ -140,13 +140,13 @@ export default async function ProductsPage({
                 href={`/products${key === "all" ? "" : `?cat=${key}`}&lang=${locale}`}
                 className="px-4 py-2 text-sm font-medium border transition-colors"
                 style={{
-                  background: isActive ? "#1B4332" : "#FFFFFF",
+                  background: isActive ? "#1B2A4A" : "#FFFFFF",
                   color: isActive ? "#FFFFFF" : "#1A1A1A",
-                  borderColor: isActive ? "#1B4332" : "#D4E6D4",
+                  borderColor: isActive ? "#1B2A4A" : "#D0D8EC",
                   borderRadius: "2px",
                 }}
               >
-                {t(locale, labelKey)}
+                {isHe ? labelHe : labelEn}
               </Link>
             );
           })}
@@ -156,20 +156,22 @@ export default async function ProductsPage({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {filtered.map((p) => {
             const displayName = isHe ? p.nameHe : p.nameEn;
-            const priceDisplay = isHe ? formatIls(p.ils) : `$${(p.ils / 3.7).toFixed(2)}`;
-            const imgSrc = p.imageUrl ?? PLACEHOLDER_SVG;
+            const priceDisplay = p.ils > 0
+              ? (isHe ? formatIls(p.ils) : `$${(p.ils / 3.7).toFixed(2)}`)
+              : "";
+            const imgSrc = p.imageUrl ?? TEQPET_LOGO_URL ?? PLACEHOLDER_SVG;
 
             return (
               <Link
                 key={p.slug}
                 href={`/products/${p.slug}?lang=${locale}`}
                 className="group border hover:shadow-md active:scale-[0.98] transition-all touch-manipulation"
-                style={{ background: "#FFFFFF", borderColor: "#D4E6D4" }}
+                style={{ background: "#FFFFFF", borderColor: "#D0D8EC" }}
               >
                 {/* Product image */}
                 <div
                   className="aspect-square overflow-hidden"
-                  style={{ background: "#F5F4F0" }}
+                  style={{ background: "#F8F9FC" }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -190,18 +192,20 @@ export default async function ProductsPage({
                     style={{
                       fontFamily: isHe
                         ? "Noto Serif Hebrew, Georgia, serif"
-                        : "Georgia, serif",
-                      color: "#1A1A1A",
+                        : "Inter, system-ui, sans-serif",
+                      color: "#1B2A4A",
                     }}
                   >
                     {displayName}
                   </h2>
-                  <span
-                    className="font-bold text-sm"
-                    style={{ color: "#1B4332" }}
-                  >
-                    {priceDisplay}
-                  </span>
+                  {priceDisplay && (
+                    <span
+                      className="font-bold text-sm"
+                      style={{ color: "#FF6B2B" }}
+                    >
+                      {priceDisplay}
+                    </span>
+                  )}
                 </div>
 
                 {/* Add to Cart CTA */}
@@ -209,7 +213,7 @@ export default async function ProductsPage({
                   <div
                     className="w-full text-center text-xs font-medium py-2 transition-colors"
                     style={{
-                      background: "#1B4332",
+                      background: "#1B2A4A",
                       color: "#FFFFFF",
                       borderRadius: "2px",
                     }}
@@ -221,14 +225,6 @@ export default async function ProductsPage({
             );
           })}
         </div>
-
-        {/* Dev note: products with no Wix image (hidden from UI, visible in HTML comment) */}
-        {missingImages.length > 0 && (
-          <div
-            style={{ display: "none" }}
-            data-missing-images={missingImages.join(",")}
-          />
-        )}
       </div>
     </div>
   );
