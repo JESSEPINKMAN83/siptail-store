@@ -3,6 +3,7 @@ import Link from "next/link";
 import WishlistButton from "@/components/WishlistButton";
 import { fetchWixProductsRest } from "@/lib/wix-client";
 import { getLocale } from "@/lib/locale";
+import { PRODUCTS } from "@/lib/products";
 import { TEQPET_LOGO_URL } from "@/lib/config";
 
 const LOGO_URL = TEQPET_LOGO_URL;
@@ -45,6 +46,8 @@ const TRUST_ITEMS_EN = [
   { icon: "\uD83D\uDCAC", label: "Support in Hebrew" },
 ];
 
+const HERO_IMAGE_URL = "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200";
+
 export default async function HomePage() {
   const locale = await getLocale();
   const isHe = locale === "he";
@@ -52,23 +55,36 @@ export default async function HomePage() {
   // Use direct REST query -- the SDK's queryProducts() can bind to a different
   // Wix site depending on which OAuth app the clientId was created on.
   const wixProducts = await fetchWixProductsRest();
+  // Index by wixId for O(1) lookup
+  const wixById = new Map(wixProducts.map((p) => [p.id, p]));
 
   const categories = isHe ? TEQPET_CATEGORIES_HE : TEQPET_CATEGORIES_EN;
   const trustItems = isHe ? TRUST_ITEMS_HE : TRUST_ITEMS_EN;
 
-  const tagline = isHe
+  // Hero copy — TeqPet brand, Hebrew primary
+  const heroHeadline = isHe
     ? "\u05d4\u05d8\u05db\u05e0\u05d5\u05dc\u05d5\u05d2\u05d9\u05d4 \u05e9\u05d7\u05d9\u05d5\u05ea \u05d4\u05de\u05d7\u05de\u05d3 \u05d0\u05d5\u05d4\u05d1\u05d5\u05ea"
     : "The technology pets love";
   const heroSub = isHe
-    ? "\u05de\u05d6\u05d9\u05e0\u05d9\u05dd \u05d7\u05db\u05de\u05d9\u05dd, \u05de\u05d6\u05e8\u05e7\u05d5\u05ea, GPS, \u05e6\u05e2\u05e6\u05d5\u05e2\u05d9\u05dd \u05d0\u05d9\u05e0\u05d8\u05e8\u05d0\u05e7\u05d8\u05d9\u05d1\u05d9\u05d9\u05dd \u05d5\u05e2\u05d5\u05d3 \u2014 \u05db\u05dc \u05d4\u05d8\u05e7 \u05dc\u05d7\u05d9\u05d5\u05ea \u05d4\u05de\u05d7\u05de\u05d3 \u05e9\u05dc\u05da \u05d1\u05de\u05e7\u05d5\u05dd \u05d0\u05d7\u05d3."
+    ? "\u05d7\u05e0\u05d5\u05ea \u05d4\u05e4\u05d8-\u05d8\u05e7 \u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d4 \u05d1\u05d9\u05e9\u05e8\u05d0\u05dc \u2014 \u05de\u05d6\u05d9\u05e0\u05d9\u05dd \u05d7\u05db\u05de\u05d9\u05dd, GPS, \u05de\u05e6\u05dc\u05de\u05d5\u05ea \u05d5\u05e2\u05d5\u05d3"
     : "Smart feeders, water fountains, GPS trackers, interactive toys and more -- all the pet tech you need in one place.";
+  const heroCta = isHe ? "\u05e7\u05e0\u05d4 \u05e2\u05db\u05e9\u05d9\u05d5" : "Shop Now";
 
   return (
     <div style={{ background: "#FFFFFF" }}>
 
       {/* Hero */}
-      <section className="px-4 py-20 md:py-28" style={{ background: "#1B2A4A" }}>
-        <div className="max-w-7xl mx-auto">
+      <section className="relative px-4 py-20 md:py-28 overflow-hidden" style={{ background: "#1B2A4A" }}>
+        {/* Hero background image */}
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `url(${HERO_IMAGE_URL})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        <div className="max-w-7xl mx-auto relative">
           <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center`}>
             <div className={isHe ? "text-right" : ""} style={isHe ? { order: 2 } : undefined}>
               <p className="text-xs uppercase tracking-widest mb-4 font-medium" style={{ color: "#FF6B2B" }}>
@@ -76,7 +92,7 @@ export default async function HomePage() {
               </p>
               <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6"
                 style={{ fontFamily: isHe ? "Noto Serif Hebrew, Georgia, serif" : "Inter, system-ui, sans-serif", color: "#FFFFFF" }}>
-                {tagline}
+                {heroHeadline}
               </h1>
               <p className="text-lg mb-8 max-w-md leading-relaxed" style={{ color: "#D0D8EC" }}>
                 {heroSub}
@@ -85,7 +101,7 @@ export default async function HomePage() {
                 <Link href={`/products?lang=${locale}`}
                   className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center hover:opacity-90 transition-opacity touch-manipulation"
                   style={{ background: "#FF6B2B", color: "#FFFFFF" }}>
-                  {isHe ? "\u05dc\u05db\u05dc \u05d4\u05de\u05d5\u05e6\u05e8\u05d9\u05dd" : "Shop Now"}
+                  {heroCta}
                 </Link>
                 <Link href={`/products?cat=smart-feeders&lang=${locale}`}
                   className="inline-block px-8 py-4 text-sm font-semibold uppercase tracking-wide text-center border hover:opacity-80 transition-opacity touch-manipulation"
@@ -102,7 +118,7 @@ export default async function HomePage() {
             <div className="relative" style={isHe ? { order: 1 } : undefined}>
               <div className="aspect-square overflow-hidden flex items-center justify-center" style={{ background: "#2D4270", borderRadius: 12 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={LOGO_URL} alt="TeqPet" className="w-3/4 h-3/4 object-contain" />
+                <img src={HERO_IMAGE_URL} alt="TeqPet" className="w-full h-full object-cover" />
               </div>
               <div className={`absolute top-4 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white ${isHe ? "right-4" : "left-4"}`}
                 style={{ background: "#FF6B2B" }}>
@@ -132,7 +148,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Products live from Wix REST API via wix-site-id scoped to TeqPet */}
+      {/* Featured products live from Wix REST API */}
       <section className="py-14 px-4" style={{ background: "#FFFFFF" }}>
         <div className="max-w-7xl mx-auto">
           <div className={`flex items-center justify-between mb-8 ${isHe ? "flex-row-reverse" : ""}`}>
@@ -143,48 +159,35 @@ export default async function HomePage() {
               {isHe ? "\u05db\u05dc \u05d4\u05de\u05d5\u05e6\u05e8\u05d9\u05dd \u2190" : "View All \u2192"}
             </Link>
           </div>
-          {wixProducts.length === 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {categories.slice(0, 4).map((cat) => (
-                <Link key={cat.slug} href={`/products?cat=${cat.slug}&lang=${locale}`}
-                  className="group border hover:shadow-md transition-all"
+
+          {/* Show first 4 products from TeqPet catalog, enriched with live Wix images */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {PRODUCTS.slice(0, 4).map((entry, i) => {
+              const live = wixById.get(entry.wixId);
+              const img = live?.mainImageUrl ?? LOGO_URL;
+              const name = live?.name ?? entry.slug;
+              const price = isHe
+                ? `\u20aa${entry.ils}`
+                : `$${(entry.ils / 3.7).toFixed(2)}`;
+              return (
+                <Link key={`${entry.wixId}-${i}`} href={`/products/${entry.wixId}?lang=${locale}`}
+                  className="group border hover:shadow-md active:scale-[0.98] transition-all touch-manipulation"
                   style={{ background: "#FFFFFF", borderColor: "#D0D8EC" }}>
-                  <div className="aspect-square overflow-hidden flex items-center justify-center" style={{ background: "#F8F9FC" }}>
+                  <div className="relative aspect-square overflow-hidden" style={{ background: "#F8F9FC" }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={LOGO_URL} alt={cat.label} className="w-3/4 h-3/4 object-contain" />
+                    <img src={img} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <WishlistButton />
                   </div>
                   <div className={`p-4 ${isHe ? "text-right" : ""}`}>
-                    <h3 className="font-semibold text-sm mb-2" style={{ color: "#1B2A4A" }}>{cat.label}</h3>
-                    <span className="text-xs font-medium" style={{ color: "#FF6B2B" }}>{isHe ? "\u05dc\u05e7\u05d8\u05d2\u05d5\u05e8\u05d9\u05d4 \u2190" : "Browse \u2192"}</span>
+                    <h3 className="font-semibold text-sm mb-2 leading-snug" style={{ color: "#1A1A1A" }}>
+                      {name}
+                    </h3>
+                    <span className="font-bold text-sm" style={{ color: "#FF6B2B" }}>{price}</span>
                   </div>
                 </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {wixProducts.slice(0, 8).map((p, i) => {
-                const img = p.mainImageUrl ?? LOGO_URL;
-                const price = p.priceFormatted ?? "";
-                return (
-                  <Link key={`${p.id}-${i}`} href={`/products/${p.slug}?lang=${locale}`}
-                    className="group border hover:shadow-md active:scale-[0.98] transition-all touch-manipulation"
-                    style={{ background: "#FFFFFF", borderColor: "#D0D8EC" }}>
-                    <div className="relative aspect-square overflow-hidden" style={{ background: "#F8F9FC" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      <WishlistButton />
-                    </div>
-                    <div className={`p-4 ${isHe ? "text-right" : ""}`}>
-                      <h3 className="font-semibold text-sm mb-2 leading-snug" style={{ color: "#1A1A1A" }}>
-                        {p.name}
-                      </h3>
-                      <span className="font-bold text-sm" style={{ color: "#FF6B2B" }}>{price}</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
       </section>
 
