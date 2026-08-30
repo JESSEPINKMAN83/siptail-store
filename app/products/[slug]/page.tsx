@@ -43,26 +43,6 @@ type WixRestProduct = {
   } | null;
 };
 
-
-// Extract plain text from a Wix Stores v3 RichContent description object.
-// The API returns description as a RichContent object when ?fields=DESCRIPTION is set.
-// Each paragraph node has child TEXT nodes with textData.text.
-function extractDescriptionText(raw: unknown): string {
-  if (!raw) return "";
-  if (typeof raw === "string") return raw;
-  // RichContent shape: { nodes: [ { type: "PARAGRAPH", nodes: [ { type: "TEXT", textData: { text: "..." } } ] } ] }
-  try {
-    const rc = raw as { nodes?: Array<{ type?: string; nodes?: Array<{ type?: string; textData?: { text?: string } }> }> };
-    const paragraphs = (rc.nodes ?? []).map((para) => {
-      const textNodes = (para.nodes ?? []).filter((n) => n.type === "TEXT");
-      return textNodes.map((n) => n.textData?.text ?? "").join("");
-    }).filter(Boolean);
-    return paragraphs.join("\n");
-  } catch {
-    return "";
-  }
-}
-
 async function fetchProductRest(wixId: string): Promise<WixRestProduct | null> {
   try {
     const tokenRes = await fetch(
@@ -135,7 +115,7 @@ function toWixStaticUrl(raw: string | null | undefined, w = 800, h = 800): strin
   return `https://static.wixstatic.com/media/${fileId}/v1/fit/w_${w},h_${h},q_85/${filename}`;
 }
 
-// The [slug] segment now carries the Wix product ID (UUID), not the Hebrew slug.
+// The [slug] segment carries the Wix product ID (UUID), not the Hebrew slug.
 // All product card links use /products/${wixId} for ASCII-safe URLs.
 export default async function ProductDetailPage({
   params,
@@ -152,14 +132,11 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  const hebrewName = t("he", `product.${catalogEntry.slug}.name` as any) || catalogEntry.slug;
-  const englishName = t("en", `product.${catalogEntry.slug}.name` as any) || catalogEntry.slug;
-  const displayName = isHe ? hebrewName : englishName;
+  // Use the name fields baked into the catalog entry directly.
+  const displayName = isHe ? catalogEntry.name : catalogEntry.nameEn;
 
   // Fetch the single product with field flags for media + description.
-  // Also fetch the product list (which works reliably) as a fallback image source
-  // in case the direct GET returns 404 (happens when the wixId exists in the
-  // static catalog but the live site serves a different product set).
+  // Also fetch the product list as a fallback image source.
   const [wixProduct, allProducts] = await Promise.all([
     fetchProductRest(wixId),
     fetchWixProductsRest(),
@@ -171,7 +148,6 @@ export default async function ProductDetailPage({
   const images: string[] = [];
   if (wixProduct) {
     // Primary: itemsInfo items from the REST GET with field flag.
-    // v3 REST: image URL is nested at item.image.url (item.url is null in Wix-hosted media).
     const allItems = wixProduct?.media?.itemsInfo?.items ?? [];
     for (const item of allItems) {
       const rawUrl = item?.image?.url ?? item?.url;
@@ -179,7 +155,7 @@ export default async function ProductDetailPage({
       if (converted && !images.includes(converted)) images.push(converted);
     }
     if (images.length === 0) {
-      // Fallback: media.main — URL lives at media.main.image.url, not media.main.url
+      // Fallback: media.main
       const mainConverted = toWixStaticUrl(
         wixProduct?.media?.main?.image?.url ?? wixProduct?.media?.main?.url
       );
@@ -201,13 +177,14 @@ export default async function ProductDetailPage({
   const basePrice = isHe
     ? ilsPrice
     : `$${(catalogEntry.ils / 3.7).toFixed(2)}`;
+
   const heColorMap: Record<string, string> = {
-    Black: "\u05e1\u05d7\u05d5\u05e8", Blue: "\u05db\u05d7\u05d5\u05dc", Red: "\u05d0\u05d3\u05d5\u05dd", Purple: "\u05e1\u05d2\u05d5\u05dc",
-    Green: "\u05d9\u05e8\u05d5\u05e7", White: "\u05dc\u05d1\u05df", Yellow: "\u05e6\u05d4\u05d5\u05d1", Orange: "\u05db\u05ea\u05d5\u05dd",
+    Black: "שחור", Blue: "כחול", Red: "אדום", Purple: "סגול",
+    Green: "ירוק", White: "לבן", Yellow: "צהוב", Orange: "כתום",
   };
   const heSizeMap: Record<string, string> = {
     S: "S", M: "M", L: "L", XL: "XL",
-    Small: "\u05e7\u05d8\u05df", Medium: "\u05d1\u05d9\u05e0\u05d5\u05e0\u05d9", Large: "\u05d2\u05d3\u05d5\u05dc",
+    Small: "קטן", Medium: "בינוני", Large: "גדול",
   };
   function hebrewifyChoiceName(name: string): string {
     return heColorMap[name] ?? heSizeMap[name] ?? name;
@@ -228,18 +205,14 @@ export default async function ProductDetailPage({
     });
     return {
       id: getVariantId(v),
-      label: choiceNames.join(" / ") || (isHe ? "\u05d1\u05e8\u05d9\u05e8\u05ea \u05de\u05d7\u05d3\u05dc" : "Default"),
+      label: choiceNames.join(" / ") || (isHe ? "ברירת מחדל" : "Default"),
       price: basePrice,
       rawPrice: getVariantPrice(v),
     };
   });
 
-  const translationDescKey = `product.${catalogEntry.slug}.description` as any;
-  const descriptionFromTranslations = t(locale, translationDescKey);
-  const description =
-    (descriptionFromTranslations && descriptionFromTranslations !== translationDescKey)
-      ? descriptionFromTranslations
-      : extractDescriptionText((wixProduct as any)?.description ?? (wixProduct as any)?.plainDescription);
+  // Description: use the baked-in catalog description.
+  const description = catalogEntry.description;
 
   const productId = wixProduct?.id ?? wixId;
 
@@ -252,13 +225,13 @@ export default async function ProductDetailPage({
           aria-label="breadcrumb"
         >
           <Link href={`/?lang=${locale}`} className="hover:text-[#1B4332] transition-colors" style={{ color: "#6B7280" }}>
-            {isHe ? "\u05d1\u05d9\u05ea" : "Home"}
+            {isHe ? "בית" : "Home"}
           </Link>
-          <span style={{ color: "#D4E6D4" }}>{isHe ? "\u2039" : "\u203a"}</span>
+          <span style={{ color: "#D4E6D4" }}>{isHe ? "‹" : "›"}</span>
           <Link href={`/products?lang=${locale}`} className="hover:text-[#1B4332] transition-colors" style={{ color: "#6B7280" }}>
-            {isHe ? "\u05d7\u05e0\u05d5\u05ea" : "Shop"}
+            {isHe ? "חנות" : "Shop"}
           </Link>
-          <span style={{ color: "#D4E6D4" }}>{isHe ? "\u2039" : "\u203a"}</span>
+          <span style={{ color: "#D4E6D4" }}>{isHe ? "‹" : "›"}</span>
           <span style={{ color: "#1A1A1A" }}>{displayName}</span>
         </nav>
       </div>
@@ -295,9 +268,7 @@ export default async function ProductDetailPage({
           related={PRODUCTS.filter((p) => p.wixId !== wixId)
             .slice(0, 3)
             .map((p) => ({
-              name: isHe
-                ? (t("he", `product.${p.slug}.name` as any) || p.slug)
-                : (t("en", `product.${p.slug}.name` as any) || p.slug),
+              name: isHe ? p.name : p.nameEn,
               price: isHe ? formatIls(p.ils) : `$${(p.ils / 3.7).toFixed(2)}`,
               slug: p.wixId,
             }))}
