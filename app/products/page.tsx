@@ -55,7 +55,7 @@ export default async function ProductsPage({
       ils: entry.ils,
       category: entry.category,
       name: live?.name ?? entry.slug,
-      imageUrl: live?.mainImageUrl ?? null,
+      imageUrl: live?.mainImageUrl ?? entry.image ?? null,
     };
   });
 

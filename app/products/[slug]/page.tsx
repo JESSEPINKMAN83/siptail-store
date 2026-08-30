@@ -169,6 +169,11 @@ export default async function ProductDetailPage({
     if (converted) images.push(converted);
   }
 
+  // Final fallback: use the hardcoded Unsplash image from the catalog
+  if (images.length === 0 && catalogEntry.image) {
+    images.push(catalogEntry.image);
+  }
+
   const rawVariants: AnyVariant[] = (
     (wixProduct?.variantsInfo?.variants as AnyVariant[]) ?? []
   );

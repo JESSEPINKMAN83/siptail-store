@@ -15,6 +15,7 @@ export const PRODUCTS = [
     name: "מזין אוטומטי WiFi עם מצלמה HD",
     nameEn: "Auto WiFi Feeder with HD Camera",
     description: "מזין חכם עם מצלמה HD ורמקול דו-כיווני. שלוט מהאפליקציה בכל שעה, צפה בחיית המחמד שלך ותן לה אוכל מרחוק. קיבולת 4 ליטר.",
+    image: "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=600",
   },
   {
     slug: "מזין-אוטומטי-כפול-wifi-עם-אפליקציה-6l",
@@ -26,6 +27,7 @@ export const PRODUCTS = [
     name: "מזין אוטומטי כפול WiFi",
     nameEn: "Dual Auto WiFi Feeder",
     description: "שתי קערות נפרדות לכלב ולחתול עם שליטה מלאה מהאפליקציה. קיבולת 6 ליטר, WiFi מובנה, תזמון אוטומטי.",
+    image: "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=600",
   },
   {
     slug: "קערת-האכלה-איטית-מחצלת-ליקוק-סיליקון",
@@ -37,6 +39,7 @@ export const PRODUCTS = [
     name: "קערת האכלה איטית + מחצלת ליקוק",
     nameEn: "Slow Feeder Bowl + Lick Mat",
     description: "קומבו נגד בליעה מהירה: קערת סיליקון עם מבוך ומחצלת ליקוק. עמיד למדיח, בטוח ל-100%.",
+    image: "https://images.unsplash.com/photo-1602584386319-fa8eb4361c2c?w=600",
   },
   // Smart Water Fountains (3)
   {
@@ -49,6 +52,7 @@ export const PRODUCTS = [
     name: "מזרקת נירוסטה חשמלית 2.5L",
     nameEn: "Electric Steel Fountain 2.5L",
     description: "3 שלבי סינון, כולל 2 פילטרים חינם, נירוסטה פרימיום. הגנה מקסימלית מחיידקים.",
+    image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600",
   },
   {
     slug: "מזרקה-אלחוטית-35l-עם-חיישן-תנועה-מנוע-שקט",
@@ -60,6 +64,7 @@ export const PRODUCTS = [
     name: "מזרקה אלחוטית 3.5L עם חיישן תנועה",
     nameEn: "Wireless Fountain 3.5L Motion Sensor",
     description: "BPA Free, מנוע שקט במיוחד, חיישן תנועה אוטומטי. מים זורמים תמיד טריים ומסוננים.",
+    image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600",
   },
   {
     slug: "מזרקת-נירוסטה-אלחוטית-32l-5000mah-חיישן-תנועה",
@@ -71,6 +76,7 @@ export const PRODUCTS = [
     name: "מזרקת נירוסטה אלחוטית 3.2L",
     nameEn: "Wireless Steel Fountain 3.2L",
     description: "סוללה 5000mAh, חיישן תנועה חכם, נירוסטה 304 כשרה. פועלת ללא חשמל עד 30 יום.",
+    image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600",
   },
   // GPS Trackers (2)
   {
@@ -83,6 +89,7 @@ export const PRODUCTS = [
     name: "גשמן GPS מיני ללא SIM",
     nameEn: "Mini GPS Tracker No SIM",
     description: "Bluetooth + GPS, אין צורך ב-SIM או מינוי. קל ומיניאטורי, אידיאלי לחתולים.",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600",
   },
   {
     slug: "גשמן-gps-עמיד-למים-עם-מיקום-בזמן-אמת",
@@ -94,6 +101,7 @@ export const PRODUCTS = [
     name: "גשמן GPS עמיד למים",
     nameEn: "Waterproof GPS Tracker",
     description: "עמיד למים IP67, מיקום בזמן אמת, התראת תנועה. עובד על רשת הסלולר הישראלית.",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600",
   },
   // Smart Toys (2)
   {
@@ -106,6 +114,7 @@ export const PRODUCTS = [
     name: "צעצוע לייזר אוטומטי לחתולים",
     nameEn: "Auto Laser Cat Toy",
     description: "סיבוב 360°, 3 מהירויות, כיבוי אוטומטי אחרי 15 דקות. USB-C נטען.",
+    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600",
   },
   {
     slug: "צעצוע-עצם-מתגלגל-חכם-לכלבים-usb-c",
@@ -117,6 +126,7 @@ export const PRODUCTS = [
     name: "צעצוע עצם מתגלגל חכם לכלבים",
     nameEn: "Smart Rolling Bone Toy",
     description: "סיליקון בטיחותי, USB-C, תנועה אוטומטית שמגרה כלבים. טעינה ב-2 שעות, משחק ל-6 שעות.",
+    image: "https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?w=600",
   },
   // Grooming Tech (4)
   {
@@ -129,6 +139,7 @@ export const PRODUCTS = [
     name: "מברשת גריפה 3-ב-1 עם קיטור",
     nameEn: "3-in-1 Steam Grooming Brush",
     description: "הורדת שיער + ריסוס + עיסוי בכלי אחד. מצמצמת שיער ב-90%.",
+    image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600",
   },
   {
     slug: "מנקה-כפות-חשמלי-usb-c-מברשת-סיליקון",
@@ -140,6 +151,7 @@ export const PRODUCTS = [
     name: "מנקה כפות חשמלי USB-C",
     nameEn: "Electric Paw Cleaner",
     description: "מברשת סיליקון מסתובבת, לחיצה אחת, מנקה בוץ ולכלוך תוך שניות.",
+    image: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600",
   },
   {
     slug: "משחזת-ציפורניים-חשמלית-3-מהירויות-usb-c-שקט",
@@ -151,6 +163,7 @@ export const PRODUCTS = [
     name: "משחזת ציפורניים חשמלית שקטה",
     nameEn: "Quiet Electric Nail Grinder",
     description: "3 מהירויות, USB-C, פעולה שקטה במיוחד. לא מפחידה את החיה.",
+    image: "https://images.unsplash.com/photo-1625321171515-994b98e28450?w=600",
   },
   {
     slug: "מספריים-משחזת-ציפורניים-2-ב-1-עם-תאורת-led",
@@ -162,6 +175,7 @@ export const PRODUCTS = [
     name: "מספריים + משחזת ציפורניים 2-ב-1",
     nameEn: "LED Nail Clipper + Grinder",
     description: "תאורת LED מובנית לדיוק מרבי, מגן בטיחות, מתאים לכל הגזעים.",
+    image: "https://images.unsplash.com/photo-1625321171515-994b98e28450?w=600",
   },
   // Grooming Accessories (1)
   {
@@ -174,6 +188,7 @@ export const PRODUCTS = [
     name: "מגבונים לאצבע 3-ב-1 לחיות",
     nameEn: "3-in-1 Pet Finger Wipes 50pcs",
     description: "שיניים + עיניים + אוזניים בשקית אחת. ללא אלכוהול, בטוח לבליעה.",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600",
   },
   // Travel Accessories (4)
   {
@@ -186,6 +201,7 @@ export const PRODUCTS = [
     name: "בקבוק נסיעה נירוסטה 2-ב-1",
     nameEn: "2-in-1 Steel Travel Bottle",
     description: "מתקפל לקערה תוך שנייה, נירוסטה 304, מושלם לטיולים.",
+    image: "https://images.unsplash.com/photo-1602584386319-fa8eb4361c2c?w=600",
   },
   {
     slug: "תיק-גב-נשיאה-פרימיום-לחתולים-וכלבים-קטנים-חלון-עגול",
@@ -197,6 +213,7 @@ export const PRODUCTS = [
     name: "תיק גב נשיאה פרימיום לחיות",
     nameEn: "Premium Pet Carrier Backpack",
     description: "חלון עגול פנורמי, רשת אוורור, מתאים לחתולים וכלבים עד 8 ק\"ג.",
+    image: "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=600",
   },
   {
     slug: "רתמת-בטיחות-לרכב-לכלבים-אבזם-crash-tested-רפלקטיבי",
@@ -208,6 +225,7 @@ export const PRODUCTS = [
     name: "רתמת בטיחות לרכב לכלבים",
     nameEn: "Car Safety Harness",
     description: "אבזם Crash-Tested, רפלקטיבי, מתאים לכל גדלי הכלבים.",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600",
   },
   {
     slug: "רצועת-כלב-hands-free-עם-בנג'י-רפלקטיבי-כיס-לטלפון",
@@ -219,6 +237,7 @@ export const PRODUCTS = [
     name: "רצועת כלב Hands-Free עם בנג'י",
     nameEn: "Hands-Free Bungee Dog Leash",
     description: "נגד משיכה, כיס לטלפון, רפלקטיבי לבטיחות לילה.",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600",
   },
   // Pet Cameras (2)
   {
@@ -231,6 +250,7 @@ export const PRODUCTS = [
     name: "מצלמת חיות + מזין פינוקים",
     nameEn: "Pet Camera + Treat Dispenser",
     description: "זריקת פינוקים מרחוק, HD, שמע דו-כיווני, שליטה מהאפליקציה.",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600",
   },
   {
     slug: "מצלמת-חיות-מחמד-1080p-ראיית-לילה-שמע-דו-כיווני-wifi",
@@ -242,6 +262,7 @@ export const PRODUCTS = [
     name: "מצלמת חיות 1080p עם ראיית לילה",
     nameEn: "1080p Pet Camera Night Vision",
     description: "WiFi, שמע דו-כיווני, ראיית לילה, התראת תנועה לנייד.",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600",
   },
   // Activity Monitors (2)
   {
@@ -254,6 +275,7 @@ export const PRODUCTS = [
     name: "תג מוניטור בריאות לחיות",
     nameEn: "Pet Health Monitor Tag",
     description: "שינה, קלוריות, צעדים — ללא GPS, ללא מינוי, קל ומיניאטורי.",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600",
   },
   {
     slug: "מעקב-פעילות-חכם-לצווארון-gps-ספירת-צעדים-בריאות",
@@ -265,6 +287,7 @@ export const PRODUCTS = [
     name: "מעקב פעילות חכם לצווארון",
     nameEn: "Smart Activity Collar Monitor",
     description: "GPS + ספירת צעדים + ניטור בריאות, עמיד למים, סוללה לשבוע.",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600",
   },
 ] as const;
 
