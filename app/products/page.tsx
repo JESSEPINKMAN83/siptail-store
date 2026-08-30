@@ -14,7 +14,7 @@ const CATEGORY_TABS = [
   { key: "all",                   labelHe: "\u05db\u05dc \u05d4\u05de\u05d5\u05e6\u05e8\u05d9\u05dd",     labelEn: "All" },
   { key: "smart-feeders",         labelHe: "\u05de\u05d6\u05d9\u05e0\u05d9\u05dd \u05d7\u05db\u05de\u05d9\u05dd",    labelEn: "Smart Feeders" },
   { key: "water-fountains",       labelHe: "\u05de\u05d6\u05e8\u05e7\u05d5\u05ea \u05de\u05d9\u05dd",     labelEn: "Water Fountains" },
-  { key: "gps-tracking",          labelHe: "GPS \u05d5\u05de\u05e2\u05e7\u05d1",      labelEn: "GPS & Tracking" },
+  { key: "gps-tracking",          labelHe: "GPS \u05d5\u05de\u05e2\u05e7\u05d1",       labelEn: "GPS & Tracking" },
   { key: "smart-toys",            labelHe: "\u05e6\u05e2\u05e6\u05d5\u05e2\u05d9\u05dd \u05d7\u05db\u05de\u05d9\u05dd",  labelEn: "Smart Toys" },
   { key: "tech-grooming",         labelHe: "\u05d8\u05d9\u05e4\u05d5\u05d7 \u05d8\u05db\u05e0\u05d5\u05dc\u05d5\u05d2\u05d9", labelEn: "Tech Grooming" },
   { key: "grooming-accessories",  labelHe: "\u05d0\u05d1\u05d9\u05d6\u05e8\u05d9 \u05d8\u05d9\u05e4\u05d5\u05d7",   labelEn: "Grooming Accessories" },
@@ -35,28 +35,27 @@ export default async function ProductsPage({
 
   // Fetch live products via direct REST call scoped to the TeqPet site.
   const wixProducts = await fetchWixProductsRest();
-  const wixBySlug = new Map(wixProducts.map((p) => [p.slug, p]));
+  // Index by wixId for image lookup
+  const wixById = new Map(wixProducts.map((p) => [p.id, p]));
 
-  // Build display list from the static catalog (correct slugs/categories/ILS prices),
+  // Build display list from the static catalog (correct categories/ILS prices),
   // enriched with live Wix images where available.
   type DisplayProduct = {
-    slug: string;
+    wixId: string;
     ils: number;
     category: string;
     name: string;
     imageUrl: string | null;
-    wixId: string;
   };
 
   const allDisplay: DisplayProduct[] = PRODUCTS.map((entry) => {
-    const live = wixBySlug.get(entry.slug);
+    const live = wixById.get(entry.wixId);
     return {
-      slug: entry.slug,
+      wixId: entry.wixId,
       ils: entry.ils,
       category: entry.category,
       name: live?.name ?? entry.slug,
       imageUrl: live?.mainImageUrl ?? null,
-      wixId: entry.wixId,
     };
   });
 
@@ -109,7 +108,7 @@ export default async function ProductsPage({
           })}
         </div>
 
-        {/* Product grid */}
+        {/* Product grid — links now use /products/${wixId} (ASCII UUIDs, no Hebrew in URL) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {filtered.map((p) => {
             const priceDisplay = isHe ? formatIls(p.ils) : `$${(p.ils / 3.7).toFixed(2)}`;
@@ -117,8 +116,8 @@ export default async function ProductsPage({
 
             return (
               <Link
-                key={p.slug}
-                href={`/products/${p.slug}?lang=${locale}`}
+                key={p.wixId}
+                href={`/products/${p.wixId}?lang=${locale}`}
                 className="group border hover:shadow-md active:scale-[0.98] transition-all touch-manipulation"
                 style={{ background: "#FFFFFF", borderColor: "#D0D8EC" }}
               >
