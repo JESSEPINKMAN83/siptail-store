@@ -6,6 +6,7 @@ import { PRODUCTS, getProductByWixId, formatIls } from "@/lib/products";
 import ProductPageClient from "@/components/ProductPageClient";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { fetchWixProductsRest } from "@/lib/wix-client";
 
 const WIX_SITE_ID = process.env.NEXT_PUBLIC_WIX_SITE_ID || "c9466f44-badc-4481-af3e-2b00fa6472c8";
 const WIX_CLIENT_ID = process.env.NEXT_PUBLIC_WIX_CLIENT_ID || "1d47ce62-8390-4782-86d3-c706cde04ec3";
@@ -19,7 +20,7 @@ type WixRestProduct = {
   media?: {
     main?: { url?: string | null; mediaType?: string | null; image?: { url?: string | null } | null } | null;
     itemsInfo?: {
-      items?: Array<{ url?: string | null; mediaType?: string | null }> | null;
+      items?: Array<{ url?: string | null; image?: { url?: string | null } | null; mediaType?: string | null }> | null;
     } | null;
   } | null;
   priceData?: { price?: number | null; currency?: string | null } | null;
@@ -155,21 +156,41 @@ export default async function ProductDetailPage({
   const englishName = t("en", `product.${catalogEntry.slug}.name` as any) || catalogEntry.slug;
   const displayName = isHe ? hebrewName : englishName;
 
-  const wixProduct = await fetchProductRest(wixId);
+  // Fetch the single product with field flags for media + description.
+  // Also fetch the product list (which works reliably) as a fallback image source
+  // in case the direct GET returns 404 (happens when the wixId exists in the
+  // static catalog but the live site serves a different product set).
+  const [wixProduct, allProducts] = await Promise.all([
+    fetchProductRest(wixId),
+    fetchWixProductsRest(),
+  ]);
+
+  // Find this product in the list-page query results (fallback image source)
+  const listProduct = allProducts.find((p) => p.id === wixId);
 
   const images: string[] = [];
-  const allItems = wixProduct?.media?.itemsInfo?.items ?? [];
-  for (const item of allItems) {
-    // v3 REST: image URL is at item.url directly (not item.image.url)
-    const converted = toWixStaticUrl(item?.url);
-    if (converted && !images.includes(converted)) images.push(converted);
+  if (wixProduct) {
+    // Primary: itemsInfo items from the REST GET with field flag.
+    // v3 REST: image URL is nested at item.image.url (item.url is null in Wix-hosted media).
+    const allItems = wixProduct?.media?.itemsInfo?.items ?? [];
+    for (const item of allItems) {
+      const rawUrl = item?.image?.url ?? item?.url;
+      const converted = toWixStaticUrl(rawUrl);
+      if (converted && !images.includes(converted)) images.push(converted);
+    }
+    if (images.length === 0) {
+      // Fallback: media.main — URL lives at media.main.image.url, not media.main.url
+      const mainConverted = toWixStaticUrl(
+        wixProduct?.media?.main?.image?.url ?? wixProduct?.media?.main?.url
+      );
+      if (mainConverted) images.push(mainConverted);
+    }
   }
-  if (images.length === 0) {
-    // Fallback: media.main — check both possible shapes
-    const mainConverted = toWixStaticUrl(
-      wixProduct?.media?.main?.image?.url ?? wixProduct?.media?.main?.url
-    );
-    if (mainConverted) images.push(mainConverted);
+
+  // If we still have no images, use the image from the working list query
+  if (images.length === 0 && listProduct?.mainImageUrl) {
+    const converted = toWixStaticUrl(listProduct.mainImageUrl);
+    if (converted) images.push(converted);
   }
 
   const rawVariants: AnyVariant[] = (
@@ -180,9 +201,8 @@ export default async function ProductDetailPage({
   const basePrice = isHe
     ? ilsPrice
     : `$${(catalogEntry.ils / 3.7).toFixed(2)}`;
-
   const heColorMap: Record<string, string> = {
-    Black: "\u05e9\u05d7\u05d5\u05e8", Blue: "\u05db\u05d7\u05d5\u05dc", Red: "\u05d0\u05d3\u05d5\u05dd", Purple: "\u05e1\u05d2\u05d5\u05dc",
+    Black: "\u05e1\u05d7\u05d5\u05e8", Blue: "\u05db\u05d7\u05d5\u05dc", Red: "\u05d0\u05d3\u05d5\u05dd", Purple: "\u05e1\u05d2\u05d5\u05dc",
     Green: "\u05d9\u05e8\u05d5\u05e7", White: "\u05dc\u05d1\u05df", Yellow: "\u05e6\u05d4\u05d5\u05d1", Orange: "\u05db\u05ea\u05d5\u05dd",
   };
   const heSizeMap: Record<string, string> = {
