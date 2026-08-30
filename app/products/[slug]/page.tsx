@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import { getLocale } from "@/lib/locale";
 import { t } from "@/lib/translations";
 import { getWhatsAppUrl } from "@/lib/config";
-import { PRODUCTS, getProductBySlug, formatIls } from "@/lib/products";
+import { PRODUCTS, getProductByWixId, formatIls } from "@/lib/products";
 import ProductPageClient from "@/components/ProductPageClient";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -17,7 +17,7 @@ type WixRestProduct = {
   description?: string | null;
   revision?: string | null;
   media?: {
-    main?: { url?: string | null; mediaType?: string | null } | null;
+    main?: { url?: string | null; mediaType?: string | null; image?: { url?: string | null } | null } | null;
     itemsInfo?: {
       items?: Array<{ url?: string | null; mediaType?: string | null }> | null;
     } | null;
@@ -114,37 +114,43 @@ function toWixStaticUrl(raw: string | null | undefined, w = 800, h = 800): strin
   return `https://static.wixstatic.com/media/${fileId}/v1/fit/w_${w},h_${h},q_85/${filename}`;
 }
 
+// The [slug] segment now carries the Wix product ID (UUID), not the Hebrew slug.
+// All product card links use /products/${wixId} for ASCII-safe URLs.
 export default async function ProductDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug: wixId } = await params;
   const locale = await getLocale();
   const isHe = locale === "he";
 
-  const catalogEntry = getProductBySlug(slug);
+  // Look up by wixId (the URL segment)
+  const catalogEntry = getProductByWixId(wixId);
   if (!catalogEntry) {
     notFound();
   }
 
-  const hebrewName = t("he", `product.${slug}.name` as any) || slug;
-  const englishName = t("en", `product.${slug}.name` as any) || slug;
+  const hebrewName = t("he", `product.${catalogEntry.slug}.name` as any) || catalogEntry.slug;
+  const englishName = t("en", `product.${catalogEntry.slug}.name` as any) || catalogEntry.slug;
   const displayName = isHe ? hebrewName : englishName;
 
-  const wixProduct = await fetchProductRest(catalogEntry.wixId);
+  const wixProduct = await fetchProductRest(wixId);
 
   const images: string[] = [];
   const allItems = wixProduct?.media?.itemsInfo?.items ?? [];
   for (const item of allItems) {
+    // v3 REST: image URL is at item.url directly (not item.image.url)
     const converted = toWixStaticUrl(item?.url);
     if (converted && !images.includes(converted)) images.push(converted);
   }
   if (images.length === 0) {
-    const mainConverted = toWixStaticUrl(wixProduct?.media?.main?.url);
+    // Fallback: media.main — check both possible shapes
+    const mainConverted = toWixStaticUrl(
+      wixProduct?.media?.main?.image?.url ?? wixProduct?.media?.main?.url
+    );
     if (mainConverted) images.push(mainConverted);
   }
-  // No heroImage field in TeqPet catalog; live Wix images populate once media is uploaded.
 
   const rawVariants: AnyVariant[] = (
     (wixProduct?.variantsInfo?.variants as AnyVariant[]) ?? []
@@ -188,14 +194,14 @@ export default async function ProductDetailPage({
     };
   });
 
-  const translationDescKey = `product.${slug}.description` as any;
+  const translationDescKey = `product.${catalogEntry.slug}.description` as any;
   const descriptionFromTranslations = t(locale, translationDescKey);
   const description =
     (descriptionFromTranslations && descriptionFromTranslations !== translationDescKey)
       ? descriptionFromTranslations
       : ((wixProduct as any)?.description ?? (wixProduct as any)?.plainDescription ?? "");
 
-  const productId = wixProduct?.id ?? catalogEntry.wixId;
+  const productId = wixProduct?.id ?? wixId;
 
   return (
     <div style={{ background: "#F5F4F0" }} dir={isHe ? "rtl" : "ltr"}>
@@ -237,7 +243,7 @@ export default async function ProductDetailPage({
           product={{
             id: productId as string,
             name: displayName,
-            slug,
+            slug: wixId,
             description,
             basePrice,
             isLive: !!wixProduct,
@@ -246,14 +252,14 @@ export default async function ProductDetailPage({
           }}
           locale={locale}
           waUrl={getWhatsAppUrl(locale)}
-          related={PRODUCTS.filter((p) => p.slug !== slug)
+          related={PRODUCTS.filter((p) => p.wixId !== wixId)
             .slice(0, 3)
             .map((p) => ({
               name: isHe
                 ? (t("he", `product.${p.slug}.name` as any) || p.slug)
                 : (t("en", `product.${p.slug}.name` as any) || p.slug),
               price: isHe ? formatIls(p.ils) : `$${(p.ils / 3.7).toFixed(2)}`,
-              slug: p.slug,
+              slug: p.wixId,
             }))}
         />
       </div>
