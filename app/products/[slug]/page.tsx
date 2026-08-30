@@ -14,7 +14,7 @@ type WixRestProduct = {
   id?: string | null;
   slug?: string | null;
   name?: string | null;
-  description?: string | null;
+  description?: { nodes?: Array<{ type?: string; nodes?: Array<{ type?: string; textData?: { text?: string } }> }> } | string | null;
   revision?: string | null;
   media?: {
     main?: { url?: string | null; mediaType?: string | null; image?: { url?: string | null } | null } | null;
@@ -42,6 +42,26 @@ type WixRestProduct = {
   } | null;
 };
 
+
+// Extract plain text from a Wix Stores v3 RichContent description object.
+// The API returns description as a RichContent object when ?fields=DESCRIPTION is set.
+// Each paragraph node has child TEXT nodes with textData.text.
+function extractDescriptionText(raw: unknown): string {
+  if (!raw) return "";
+  if (typeof raw === "string") return raw;
+  // RichContent shape: { nodes: [ { type: "PARAGRAPH", nodes: [ { type: "TEXT", textData: { text: "..." } } ] } ] }
+  try {
+    const rc = raw as { nodes?: Array<{ type?: string; nodes?: Array<{ type?: string; textData?: { text?: string } }> }> };
+    const paragraphs = (rc.nodes ?? []).map((para) => {
+      const textNodes = (para.nodes ?? []).filter((n) => n.type === "TEXT");
+      return textNodes.map((n) => n.textData?.text ?? "").join("");
+    }).filter(Boolean);
+    return paragraphs.join("\n");
+  } catch {
+    return "";
+  }
+}
+
 async function fetchProductRest(wixId: string): Promise<WixRestProduct | null> {
   try {
     const tokenRes = await fetch(
@@ -65,7 +85,7 @@ async function fetchProductRest(wixId: string): Promise<WixRestProduct | null> {
     }
 
     const res = await fetch(
-      `https://www.wixapis.com/stores/v3/products/${wixId}?fields=MEDIA_ITEMS_INFO`,
+      `https://www.wixapis.com/stores/v3/products/${wixId}?fields=MEDIA_ITEMS_INFO&fields=DESCRIPTION`,
       {
         headers: {
           Authorization: accessToken,
@@ -199,7 +219,7 @@ export default async function ProductDetailPage({
   const description =
     (descriptionFromTranslations && descriptionFromTranslations !== translationDescKey)
       ? descriptionFromTranslations
-      : ((wixProduct as any)?.description ?? (wixProduct as any)?.plainDescription ?? "");
+      : extractDescriptionText((wixProduct as any)?.description ?? (wixProduct as any)?.plainDescription);
 
   const productId = wixProduct?.id ?? wixId;
 
