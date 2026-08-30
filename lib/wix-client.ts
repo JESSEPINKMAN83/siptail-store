@@ -54,6 +54,8 @@ export type WixRestProductSummary = {
  * The Wix SDK queryProducts() is bound to whichever Wix site the OAuth app was
  * originally created for — which may not be the TeqPet site. This direct REST
  * call uses the explicit wix-site-id header to always reach the right site.
+ *
+ * NOTE: media.main.url is absent on v3 REST; the image URL is at media.main.image.url
  */
 export async function fetchWixProductsRest(): Promise<WixRestProductSummary[]> {
   try {
@@ -81,7 +83,8 @@ export async function fetchWixProductsRest(): Promise<WixRestProductSummary[]> {
       name: p.name ?? "",
       slug: p.slug ?? "",
       visible: p.visible !== false,
-      mainImageUrl: p.media?.main?.url ?? null,
+      // v3 REST: image URL lives at media.main.image.url, not media.main.url
+      mainImageUrl: p.media?.main?.image?.url ?? p.media?.main?.url ?? null,
       priceFormatted: p.priceData?.price != null
         ? `\u20aa${Math.round(p.priceData.price)}`
         : null,
