@@ -10,7 +10,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
 import Link from "next/link";
 
-const META_PIXEL_ID = "1375359411376605";
+const META_PIXEL_ID = "2583553595399148";
 const TEQPET_LOGO_URL = "https://static.wixstatic.com/media/70d502_e3e96278eb1444ef83de9003d1ad6795~mv2.jpg";
 const SITE_URL = "https://siptail-store.vercel.app";
 
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ? "TeqPet — החנות המובילה לטכנולוגיה חכמה לחיות מחמד. מזינים חכמים, מזרקות מים, GPS, צעצועים חכמים ועוד."
       : "TeqPet — Israel's leading smart pet tech store. Smart feeders, water fountains, GPS trackers, smart toys and more.",
     openGraph: {
-      title: isHe ? "TeqPet | הטכנולוגיה שחיות המחמד אוהבות" : "TeqPet — Pet Tech Store Israel",
+      title: isHe ? "TeqPet | ״טכנולוגיה שחיות המחמד אוהבות" : "TeqPet — Pet Tech Store Israel",
       description: isHe
         ? "החנות המובילה לטכנולוגיה חכמה לחיות מחמד בישראל."
         : "Israel's leading smart pet tech store.",
